@@ -21,7 +21,7 @@ The code in this replication package constructs all of the analysis in "Revisiti
 | -- | -- | -- | -- | -- | 
 | Current Population Survey (CPS) 2004-2014 | cbspYYYYMM.dta | /build/RawData | No | U.S. Census Bureau and U.S. Bureau of Labor Statistics (2004-2014) |
 | American Community Survey (ACS) (2004-2014) | usa_00008.dta | /build/build_data | No | Ruggles, et al. (2004-2018) |
-| Doleac and Hansen (2020) BTB Law Coding | BTB_data.dta, BTB_ACS.dta | /dh_replication | Yes | Doleac and Hansen (2020) |
+| Doleac and Hansen (2020) BTB Law Coding | BTB_data.dta, BTB_ACS.dta | /dh_replication | No | Doleac and Hansen (2020) |
 | Burton and Wasser (2025) BTB Law Coding | btb_annual_laws.dta, btb_monthly_laws.dta | /build/analysis_data | Yes | Burton and Wasser (2025) |
 
 
@@ -42,7 +42,7 @@ These data are not provided here. They must be downloaded at the link above and 
 
 The paper uses data shared with us by Doleac and Hansen that includes their coding of BTB laws. These same data are also posted with their replication package on the *Journal of Labor Economics* website: https://doi.org/10.1086/705880
 
-These data are provided in /dh_replication.
+These data are not provided here. They can be obtained from the link above or by contacting us. They should be placed in /dh_replication.
 
 ### Burton and Wasser (2025) BTB Law Coding 
 
@@ -127,10 +127,11 @@ Programs are partioned into build and analysis scripts. Those in /build assemble
 The code is licensed under a MIT license. See [LICENSE.txt](LICENSE.txt) for details.
 
 ## Instructions to Replicators
-- Edit `master.do` line 11 to adjust the base path
 - Download the data files referenced above. 
     - Place CPS files in /build/RawData.
     - Place ACS extract in /build/build_data.
+    - Place Doleac and Hansen (2020) data in /dh_replication.
+- Edit `master.do` line 11 to adjust the base path.
 - Run `master.do` to run all steps in sequence.
 - If running programs individually, note that order is important.
 
