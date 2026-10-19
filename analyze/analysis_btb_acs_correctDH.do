@@ -51,7 +51,6 @@ tab cell_black_min
 tab cell_hisp_min
 tab cell_white_min
 
-<<<<<<< HEAD
 * average observations in an MSA-year-race cell, across the whole sample (every MSA-year
 * observation, not one row per MSA), and per MSA (averaged across that MSA's own years)
 disp "=== average cell size across all MSA-year cells (whole sample) ==="
@@ -66,30 +65,20 @@ egen msa_tag = tag(metroFIPS)
 summ cell_black_mean cell_hisp_mean cell_white_mean if msa_tag == 1, detail
 drop msa_tag
 
-=======
->>>>>>> 2c34ba91382b7f3e9ed86be331b5c0dd65be2bea
 
 local races "black hisp white"
 
 * tabulate the MSAs that are sampled every month or every year with at least `i' observations in each MSA-period-race cell
-<<<<<<< HEAD
 * n_years == 15 (not 16, the true max for this 2004-2019 sample) mirrors the original 2004-2014
 * file's use of n_years == 10 rather than its own true max of 11 -- both use the "one year short
 * of complete" tier, which is the one with the large, stable count of qualifying MSAs (~600 here,
 * vs. only ~124 at the strict true-max tier in either sample)
-=======
->>>>>>> 2c34ba91382b7f3e9ed86be331b5c0dd65be2bea
 forvalues i = 0(1)9 {
 	foreach race of local races {
 	local j = `i' + 1
 	disp "at least `j' `race' men sampled every year"
-<<<<<<< HEAD
 	tab metroFIPS if cell_`race'_min > `i' & n_years == 15
 	egen temp = tag(metroFIPS) if cell_`race'_min > `i' & n_years == 15
-=======
-	tab metroFIPS if cell_`race'_min > `i' & n_years == 10
-	egen temp = tag(metroFIPS) if cell_`race'_min > `i' & n_years == 10
->>>>>>> 2c34ba91382b7f3e9ed86be331b5c0dd65be2bea
 	egen n_MSAs_yr_`race'_min`j' = total(temp)
 	drop temp
 	}
@@ -111,21 +100,13 @@ label variable n_MSAs_yr_white_min "White Men"
 twoway (bar n_MSAs_yr_black_min numberB, barw(0.4) fcolor("90 90 90") lcolor(black)) (bar n_MSAs_yr_hisp_min numberH, barw(0.4) fcolor(gs12) lcolor(black)), subtitle(`"Number of MSAs in ACS Sample"', size(5) pos(11) margin(l=-9.5)) xtitle(`"Minimum Number of Men in Each MSA-Year-Race Cell"', size(5)) xscale(range(1 10)) xlabel(1(1)10, labsize(5)) title(`""') graphregion(fcolor(white)) ylabel(0(50)300, angle(horizontal) labsize(5) nogrid) legend(size(5))
 
 graph export "$out/acs_cell_sample_size_BH.eps", fontface(Times) fontfacesans(Times) fontfaceserif(Times) fontfacemono(Times) fontfacesymbol(Times) replace
-<<<<<<< HEAD
 graph export "$out/figure1c.emf", replace
-=======
-graph export "$out/figure1c.pdf", fontface(Times) fontfacesans(Times) fontfaceserif(Times) fontfacemono(Times) fontfacesymbol(Times) replace
->>>>>>> 2c34ba91382b7f3e9ed86be331b5c0dd65be2bea
 
 *** figure 1d: white ***
 twoway (bar n_MSAs_yr_white_min number, barw(0.4) fcolor(gs1) lcolor(black)), ytitle("") subtitle(`"Number of MSAs in ACS Sample"', size(5) pos(11) margin(l=-9.5)) xtitle(`"Minimum Number of Men in Each MSA-Year-Race Cell"', size(5)) xscale(range(1 10)) xlabel(1(1)10, labsize(5)) title(`""') graphregion(fcolor(white)) legend(on) yscale(range(0 300)) ylabel(0(50)300, angle(horizontal) labsize(5) nogrid) legend(size(5))
 
 graph export "$out/acs_cell_sample_size_white.eps", fontface(Times) fontfacesans(Times) fontfaceserif(Times) fontfacemono(Times) fontfacesymbol(Times) replace
-<<<<<<< HEAD
 graph export "$out/figure1d.emf", replace
-=======
-graph export "$out/figure1d.pdf", fontface(Times) fontfacesans(Times) fontfaceserif(Times) fontfacemono(Times) fontfacesymbol(Times) replace
->>>>>>> 2c34ba91382b7f3e9ed86be331b5c0dd65be2bea
 
 restore
 
@@ -160,7 +141,6 @@ replace BTBpub_lead_3to4 = 0
 eststo clear
 
 reghdfe employed BTBpub_lead_3to4 BTBpub_lead_2to3 BTBpub_lead_1to2 BTBpub_lead_0to1 BTBpub_neg1 BTBpub_lag_* if dh_blackNH==1 & year >= 2008, vce(cluster stateFIPS) absorb(age in_school educd dh_time#gereg metroFIPS##c.dh_time)
-<<<<<<< HEAD
 
 scalar pretrend_N_black = e(N)
 
@@ -188,8 +168,6 @@ scalar lead1_b_black = _b[BTBpub_lead_0to1]
 scalar lead1_se_black = _se[BTBpub_lead_0to1]
 scalar lead1_p_black = 2*ttail(e(df_r), abs(lead1_b_black/lead1_se_black))
 
-=======
->>>>>>> 2c34ba91382b7f3e9ed86be331b5c0dd65be2bea
 estimate store baseline_black
 coefplot (baseline_black, keep(BTBpub_lead_3to4 BTBpub_lead_2to3 BTBpub_lead_1to2) lcolor(black) mcolor(black)) ///
 		(baseline_black, keep(BTBpub_neg1) omitted lcolor(black) mcolor(black) offset(-0.01)) ///
@@ -197,18 +175,13 @@ coefplot (baseline_black, keep(BTBpub_lead_3to4 BTBpub_lead_2to3 BTBpub_lead_1to
 	, vertical ytitle("") xtitle("Years Since BTB Implementation", size(5)) subtitle("Effect Size", size(5) pos(11) margin(l=-9.5)) title(`""') xlabel(, labsize(5)) ylabel(-0.2(.1)0.2, angle(horizontal) labsize(5) nogrid) yscale(range(-0.2 0.2)) recast(connected) label  graphregion(fcolor(white))  lwidth(*2)  legend(off) yline(0, lcolor(gs12)) xline(4, lpattern(dash)) ciopts(recast(rline) lpattern(dash) lcolor(black)) coeflabels(BTBpub_lead_3to4 = "t-4" BTBpub_lead_2to3 = "t-3" BTBpub_lead_1to2 = "t-2" BTBpub_neg1 = "t-1" BTBpub_lag_0to1 = "t" BTBpub_lag_1to2 = "t+1" BTBpub_lag_2to3 = "t+2" BTBpub_lag_3to4 = "t+3" BTBpub_lag_4to5 = "t+4")
 
 graph export "$out/event_study_acs_annual_black_corrected.eps", fontface(Times) fontfacesans(Times) fontfaceserif(Times) fontfacemono(Times) fontfacesymbol(Times) replace
-<<<<<<< HEAD
 graph export "$out/figureA3a.emf", replace
-=======
-graph export "$out/figureA3a.pdf", fontface(Times) fontfacesans(Times) fontfaceserif(Times) fontfacemono(Times) fontfacesymbol(Times) replace
->>>>>>> 2c34ba91382b7f3e9ed86be331b5c0dd65be2bea
 
 
 *** appendix figure a.3b: Hispanic ***
 eststo clear
 
 reghdfe employed BTBpub_lead_3to4 BTBpub_lead_2to3 BTBpub_lead_1to2 BTBpub_lead_0to1 BTBpub_neg1 BTBpub_lag_* if dh_hisp==1 & year >= 2008, vce(cluster stateFIPS) absorb(age in_school educd dh_time#gereg metroFIPS##c.dh_time)
-<<<<<<< HEAD
 
 scalar pretrend_N_hisp = e(N)
 
@@ -232,8 +205,6 @@ scalar lead1_b_hisp = _b[BTBpub_lead_0to1]
 scalar lead1_se_hisp = _se[BTBpub_lead_0to1]
 scalar lead1_p_hisp = 2*ttail(e(df_r), abs(lead1_b_hisp/lead1_se_hisp))
 
-=======
->>>>>>> 2c34ba91382b7f3e9ed86be331b5c0dd65be2bea
 estimate store baseline_hisp
 coefplot (baseline_hisp, keep(BTBpub_lead_3to4 BTBpub_lead_2to3 BTBpub_lead_1to2) lcolor(black) mcolor(black)) ///
 		(baseline_hisp, keep(BTBpub_neg1) omitted lcolor(black) mcolor(black) offset(-0.01)) ///
@@ -241,18 +212,13 @@ coefplot (baseline_hisp, keep(BTBpub_lead_3to4 BTBpub_lead_2to3 BTBpub_lead_1to2
 	, vertical ytitle("") xtitle("Years Since BTB Implementation", size(5)) subtitle("Effect Size", size(5) pos(11) margin(l=-9.5)) title(`""') xlabel(, labsize(5)) ylabel(-0.2(.1)0.2, angle(horizontal) labsize(5) nogrid) yscale(range(-0.2 0.2)) recast(connected) label  graphregion(fcolor(white))  lwidth(*2)  legend(off) yline(0, lcolor(gs12)) xline(4, lpattern(dash)) ciopts(recast(rline) lpattern(dash) lcolor(black)) coeflabels(BTBpub_lead_3to4 = "t-4" BTBpub_lead_2to3 = "t-3" BTBpub_lead_1to2 = "t-2" BTBpub_neg1 = "t-1" BTBpub_lag_0to1 = "t" BTBpub_lag_1to2 = "t+1" BTBpub_lag_2to3 = "t+2" BTBpub_lag_3to4 = "t+3" BTBpub_lag_4to5 = "t+4")
 
 graph export "$out/event_study_acs_annual_hispanic_corrected.eps", fontface(Times) fontfacesans(Times) fontfaceserif(Times) fontfacemono(Times) fontfacesymbol(Times) replace
-<<<<<<< HEAD
 graph export "$out/figureA3b.emf", replace
-=======
-graph export "$out/figureA3b.pdf", fontface(Times) fontfacesans(Times) fontfaceserif(Times) fontfacemono(Times) fontfacesymbol(Times) replace
->>>>>>> 2c34ba91382b7f3e9ed86be331b5c0dd65be2bea
 
 
 *** appendix figure a.3c: white ***
 eststo clear
 
 reghdfe employed BTBpub_lead_3to4 BTBpub_lead_2to3 BTBpub_lead_1to2 BTBpub_lead_0to1 BTBpub_neg1 BTBpub_lag_* if dh_whiteNH==1 & year >= 2008, vce(cluster stateFIPS) absorb(age in_school educd dh_time#gereg metroFIPS##c.dh_time)
-<<<<<<< HEAD
 
 scalar pretrend_N_white = e(N)
 
@@ -276,8 +242,6 @@ scalar lead1_b_white = _b[BTBpub_lead_0to1]
 scalar lead1_se_white = _se[BTBpub_lead_0to1]
 scalar lead1_p_white = 2*ttail(e(df_r), abs(lead1_b_white/lead1_se_white))
 
-=======
->>>>>>> 2c34ba91382b7f3e9ed86be331b5c0dd65be2bea
 estimate store baseline_white
 coefplot (baseline_white, keep(BTBpub_lead_3to4 BTBpub_lead_2to3 BTBpub_lead_1to2) lcolor(black) mcolor(black)) ///
 		(baseline_white, keep(BTBpub_neg1) omitted lcolor(black) mcolor(black) offset(-0.01)) ///
@@ -285,7 +249,6 @@ coefplot (baseline_white, keep(BTBpub_lead_3to4 BTBpub_lead_2to3 BTBpub_lead_1to
 	, vertical ytitle("") xtitle("Years Since BTB Implementation", size(5)) subtitle("Effect Size", size(5) pos(11) margin(l=-9.5)) title(`""') xlabel(, labsize(5)) ylabel(-0.2(.1)0.2, angle(horizontal) labsize(5) nogrid) yscale(range(-0.2 0.2)) recast(connected) label  graphregion(fcolor(white))  lwidth(*2)  legend(off) yline(0, lcolor(gs12)) xline(4, lpattern(dash)) ciopts(recast(rline) lpattern(dash) lcolor(black)) coeflabels(BTBpub_lead_3to4 = "t-4" BTBpub_lead_2to3 = "t-3" BTBpub_lead_1to2 = "t-2" BTBpub_neg1 = "t-1" BTBpub_lag_0to1 = "t" BTBpub_lag_1to2 = "t+1" BTBpub_lag_2to3 = "t+2" BTBpub_lag_3to4 = "t+3" BTBpub_lag_4to5 = "t+4")
 
 graph export "$out/event_study_acs_annual_white_corrected.eps", fontface(Times) fontfacesans(Times) fontfaceserif(Times) fontfacemono(Times) fontfacesymbol(Times) replace
-<<<<<<< HEAD
 graph export "$out/figureA3c.emf", replace
 
 
@@ -867,11 +830,6 @@ coefplot (hisp_2010, keep(BTBpub_lead_3to4 BTBpub_lead_2to3 BTBpub_lead_1to2) lc
 graph export "$out/event_study_acs_annual_hispanic_2010restricted.eps", fontface(Times) fontfacesans(Times) fontfaceserif(Times) fontfacemono(Times) fontfacesymbol(Times) replace
 graph export "$out/figureA3b_2010restricted.emf", replace
 
-=======
-graph export "$out/figureA3c.pdf", fontface(Times) fontfacesans(Times) fontfaceserif(Times) fontfacemono(Times) fontfacesymbol(Times) replace
-
-
->>>>>>> 2c34ba91382b7f3e9ed86be331b5c0dd65be2bea
 
 *** public-sector employment ***
 
@@ -886,11 +844,7 @@ coefplot (baseline_black, keep(BTBpub_lead_3to4 BTBpub_lead_2to3 BTBpub_lead_1to
 	, vertical ytitle("") xtitle("Years Since BTB Implementation", size(5)) subtitle("Effect Size", size(5) pos(11) margin(l=-9.5)) title(`""') xlabel(, labsize(5)) ylabel(-0.1(.05)0.1, angle(horizontal) labsize(5) nogrid) yscale(range(-0.1 0.1)) recast(connected) label  graphregion(fcolor(white))  lwidth(*2)  legend(off) yline(0, lcolor(gs12)) xline(4, lpattern(dash)) ciopts(recast(rline) lpattern(dash) lcolor(black)) coeflabels(BTBpub_lead_3to4 = "t-4" BTBpub_lead_2to3 = "t-3" BTBpub_lead_1to2 = "t-2" BTBpub_neg1 = "t-1" BTBpub_lag_0to1 = "t" BTBpub_lag_1to2 = "t+1" BTBpub_lag_2to3 = "t+2" BTBpub_lag_3to4 = "t+3" BTBpub_lag_4to5 = "t+4")
 
 graph export "$out/event_study_acs_annual_black_public.eps", fontface(Times) fontfacesans(Times) fontfaceserif(Times) fontfacemono(Times) fontfacesymbol(Times) replace
-<<<<<<< HEAD
 graph export "$out/figureA4a.emf", replace
-=======
-graph export "$out/figureA4a.pdf", fontface(Times) fontfacesans(Times) fontfaceserif(Times) fontfacemono(Times) fontfacesymbol(Times) replace
->>>>>>> 2c34ba91382b7f3e9ed86be331b5c0dd65be2bea
 
 
 *** appendix figure a4.b: Hispanic ***
@@ -904,11 +858,7 @@ coefplot (baseline_hisp, keep(BTBpub_lead_3to4 BTBpub_lead_2to3 BTBpub_lead_1to2
 	, vertical ytitle("") xtitle("Years Since BTB Implementation", size(5)) subtitle("Effect Size", size(5) pos(11) margin(l=-9.5)) title(`""') xlabel(, labsize(5)) ylabel(-0.1(.05)0.1, angle(horizontal) labsize(5) nogrid) yscale(range(-0.1 0.1)) recast(connected) label  graphregion(fcolor(white))  lwidth(*2)  legend(off) yline(0, lcolor(gs12)) xline(4, lpattern(dash)) ciopts(recast(rline) lpattern(dash) lcolor(black)) coeflabels(BTBpub_lead_3to4 = "t-4" BTBpub_lead_2to3 = "t-3" BTBpub_lead_1to2 = "t-2" BTBpub_neg1 = "t-1" BTBpub_lag_0to1 = "t" BTBpub_lag_1to2 = "t+1" BTBpub_lag_2to3 = "t+2" BTBpub_lag_3to4 = "t+3" BTBpub_lag_4to5 = "t+4")
 
 graph export "$out/event_study_acs_annual_hispanic_public.eps", fontface(Times) fontfacesans(Times) fontfaceserif(Times) fontfacemono(Times) fontfacesymbol(Times) replace
-<<<<<<< HEAD
 graph export "$out/figureA4b.emf", replace
-=======
-graph export "$out/figureA4b.pdf", fontface(Times) fontfacesans(Times) fontfaceserif(Times) fontfacemono(Times) fontfacesymbol(Times) replace
->>>>>>> 2c34ba91382b7f3e9ed86be331b5c0dd65be2bea
 
 
 *** appendix figure a4.c: white ***
@@ -923,11 +873,7 @@ coefplot (baseline_white, keep(BTBpub_lead_3to4 BTBpub_lead_2to3 BTBpub_lead_1to
 	, vertical ytitle("") xtitle("Years Since BTB Implementation", size(5)) subtitle("Effect Size", size(5) pos(11) margin(l=-9.5)) title(`""') xlabel(, labsize(5)) ylabel(-0.1(.05)0.1, angle(horizontal) labsize(5) nogrid) yscale(range(-0.1 0.1)) recast(connected) label  graphregion(fcolor(white))  lwidth(*2)  legend(off) yline(0, lcolor(gs12)) xline(4, lpattern(dash)) ciopts(recast(rline) lpattern(dash) lcolor(black)) coeflabels(BTBpub_lead_3to4 = "t-4" BTBpub_lead_2to3 = "t-3" BTBpub_lead_1to2 = "t-2" BTBpub_neg1 = "t-1" BTBpub_lag_0to1 = "t" BTBpub_lag_1to2 = "t+1" BTBpub_lag_2to3 = "t+2" BTBpub_lag_3to4 = "t+3" BTBpub_lag_4to5 = "t+4")
 	
 graph export "$out/event_study_acs_annual_white_public.eps", fontface(Times) fontfacesans(Times) fontfaceserif(Times) fontfacemono(Times) fontfacesymbol(Times) replace
-<<<<<<< HEAD
 graph export "$out/figureA4c.emf", replace
-=======
-graph export "$out/figureA4c.pdf", fontface(Times) fontfacesans(Times) fontfaceserif(Times) fontfacemono(Times) fontfacesymbol(Times) replace
->>>>>>> 2c34ba91382b7f3e9ed86be331b5c0dd65be2bea
 
 
 
@@ -947,11 +893,7 @@ coefplot (baseline_black, keep(BTBpub_lead_3to4 BTBpub_lead_2to3 BTBpub_lead_1to
 	, vertical ytitle("") xtitle("Years Since BTB Implementation", size(5)) subtitle("Effect Size", size(5) pos(11) margin(l=-9.5)) title(`""') xlabel(, labsize(5)) ylabel(-0.2(.1)0.2, angle(horizontal) labsize(5) nogrid) yscale(range(-0.2 0.2)) recast(connected) label  graphregion(fcolor(white))  lwidth(*2)  legend(off) yline(0, lcolor(gs12)) xline(4, lpattern(dash)) ciopts(recast(rline) lpattern(dash) lcolor(black)) coeflabels(BTBpub_lead_3to4 = "t-4" BTBpub_lead_2to3 = "t-3" BTBpub_lead_1to2 = "t-2" BTBpub_neg1 = "t-1" BTBpub_lag_0to1 = "t" BTBpub_lag_1to2 = "t+1" BTBpub_lag_2to3 = "t+2" BTBpub_lag_3to4 = "t+3" BTBpub_lag_4to5 = "t+4")
 
 graph export "$out/event_study_acs_annual_black_nogq.eps", fontface(Times) fontfacesans(Times) fontfaceserif(Times) fontfacemono(Times) fontfacesymbol(Times) replace
-<<<<<<< HEAD
 graph export "$out/figureA5a.emf", replace
-=======
-graph export "$out/figureA5a.pdf", fontface(Times) fontfacesans(Times) fontfaceserif(Times) fontfacemono(Times) fontfacesymbol(Times) replace
->>>>>>> 2c34ba91382b7f3e9ed86be331b5c0dd65be2bea
 
 
 *** appendix figure a.5b: Hispanic ***
@@ -965,11 +907,7 @@ coefplot (baseline_hisp, keep(BTBpub_lead_3to4 BTBpub_lead_2to3 BTBpub_lead_1to2
 	, vertical ytitle("") xtitle("Years Since BTB Implementation", size(5)) subtitle("Effect Size", size(5) pos(11) margin(l=-9.5)) title(`""') xlabel(, labsize(5)) ylabel(-0.2(.1)0.2, angle(horizontal) labsize(5) nogrid) yscale(range(-0.2 0.2)) recast(connected) label  graphregion(fcolor(white))  lwidth(*2)  legend(off) yline(0, lcolor(gs12)) xline(4, lpattern(dash)) ciopts(recast(rline) lpattern(dash) lcolor(black)) coeflabels(BTBpub_lead_3to4 = "t-4" BTBpub_lead_2to3 = "t-3" BTBpub_lead_1to2 = "t-2" BTBpub_neg1 = "t-1" BTBpub_lag_0to1 = "t" BTBpub_lag_1to2 = "t+1" BTBpub_lag_2to3 = "t+2" BTBpub_lag_3to4 = "t+3" BTBpub_lag_4to5 = "t+4")
 
 graph export "$out/event_study_acs_annual_hispanic_nogq.eps", fontface(Times) fontfacesans(Times) fontfaceserif(Times) fontfacemono(Times) fontfacesymbol(Times) replace
-<<<<<<< HEAD
 graph export "$out/figureA5b.emf", replace
-=======
-graph export "$out/figureA5b.pdf", fontface(Times) fontfacesans(Times) fontfaceserif(Times) fontfacemono(Times) fontfacesymbol(Times) replace
->>>>>>> 2c34ba91382b7f3e9ed86be331b5c0dd65be2bea
 
 	
 *** appendix figure a.5c: white ***
@@ -983,11 +921,7 @@ coefplot (baseline_white, keep(BTBpub_lead_3to4 BTBpub_lead_2to3 BTBpub_lead_1to
 	, vertical ytitle("") xtitle("Years Since BTB Implementation", size(5)) subtitle("Effect Size", size(5) pos(11) margin(l=-9.5)) title(`""') xlabel(, labsize(5)) ylabel(-0.2(.1)0.2, angle(horizontal) labsize(5) nogrid) yscale(range(-0.2 0.2)) recast(connected) label  graphregion(fcolor(white))  lwidth(*2)  legend(off) yline(0, lcolor(gs12)) xline(4, lpattern(dash)) ciopts(recast(rline) lpattern(dash) lcolor(black)) coeflabels(BTBpub_lead_3to4 = "t-4" BTBpub_lead_2to3 = "t-3" BTBpub_lead_1to2 = "t-2" BTBpub_neg1 = "t-1" BTBpub_lag_0to1 = "t" BTBpub_lag_1to2 = "t+1" BTBpub_lag_2to3 = "t+2" BTBpub_lag_3to4 = "t+3" BTBpub_lag_4to5 = "t+4")
 	
 graph export "$out/event_study_acs_annual_white_nogq.eps", fontface(Times) fontfacesans(Times) fontfaceserif(Times) fontfacemono(Times) fontfacesymbol(Times) replace
-<<<<<<< HEAD
 graph export "$out/figureA5c.emf", replace
-=======
-graph export "$out/figureA5c.pdf", fontface(Times) fontfacesans(Times) fontfaceserif(Times) fontfacemono(Times) fontfacesymbol(Times) replace
->>>>>>> 2c34ba91382b7f3e9ed86be331b5c0dd65be2bea
 
 
 restore
@@ -1077,7 +1011,6 @@ global s_acs_wht_correct = sqrt(e(V)[3,3])
 
 global df_acs = e(df_r)
 
-<<<<<<< HEAD
 * table 2, column 7: full sample, 2010 and later. Added after the pre-trend diagnostics above
 * found that the Hispanic joint pre-trend test (t-3 = t-2 = t-1 = 0) is driven almost entirely
 * by 2008-2009, the apex of the Great Recession -- excluding those two years reduces the joint
@@ -1101,15 +1034,10 @@ qui estadd scalar white_percent = 100*(e(b)[1,3]/r(mean))
 
 
 local include_models "m1 m2 m3 m4 m5 m6"
-=======
-
-local include_models "m1 m2 m3 m4 m5"
->>>>>>> 2c34ba91382b7f3e9ed86be331b5c0dd65be2bea
 
 * Output regression table
 estfe `include_models', labels(metroFIPS "MSA FE" dh_time#gereg "Year-Region FE" age#dh_group "Demographics" metroFIPS#c.dh_time "MSA-Specific Trends")
 
-<<<<<<< HEAD
 esttab `include_models' using "$out/table2.rtf", replace compress noconstant se(4) b(4) r2(4) nogaps indicate(`r(indicate_fe)') noomitted nobase scalars("black_mean Pre-BTB Mean: Black" "hispanic_mean Pre-BTB Mean: Hispanic" "white_mean Pre-BTB Mean: White" "black_percent \% Effect: Black" "hispanic_percent \% Effect: Hispanic" "white_percent \% Effect: White") sfmt(4 4 4 2 2 2) nomtitles keep(BTBx*) coeflabels(BTBxWhiteNH "BTB x White" BTBxBlackNH "BTB x Black" BTBxHisp "BTB x Hispanic") star(* 0.10 ** 0.05 *** 0.01)
 
 
@@ -1573,9 +1501,4 @@ graph export "$out/diagnostic_bacon_hisp_2010restricted.eps", replace
 
 restore
 
-=======
-esttab `include_models' using "$out/table2.tex", replace compress noconstant se(4) b(4) r2(4) nogaps indicate(`r(indicate_fe)') noomitted nobase scalars("black_mean Pre-BTB Mean: Black" "hispanic_mean Pre-BTB Mean: Hispanic" "white_mean Pre-BTB Mean: White" "black_percent \% Effect: Black" "hispanic_percent \% Effect: Hispanic" "white_percent \% Effect: White") sfmt(4 4 4 2 2 2) nomtitles keep(BTBx*) coeflabels(BTBxWhiteNH "BTB x White" BTBxBlackNH "BTB x Black" BTBxHisp "BTB x Hispanic") star(* 0.10 ** 0.05 *** 0.01)
-
-
->>>>>>> 2c34ba91382b7f3e9ed86be331b5c0dd65be2bea
 log close

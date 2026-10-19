@@ -39,11 +39,7 @@ local summ_vars "BTB BTBever dh_white dh_black dh_hisp age in_school no_hs ged_o
 
 eststo clear
 bys dh_group BTBever : eststo: qui estpost summ `summ_vars'
-<<<<<<< HEAD
 esttab using "$out/tableA1.rtf", replace compress nogaps main(mean 4) aux(sd 4) label nostar nodepvar unstack nonotes mtitles("White" "White" "Black" "Black" "Hispanic" "Hispanic")
-=======
-esttab using "$out/tableA1.tex", replace compress nogaps main(mean 4) aux(sd 4) label nostar nodepvar unstack nonotes mtitles("White" "White" "Black" "Black" "Hispanic" "Hispanic")
->>>>>>> 2c34ba91382b7f3e9ed86be331b5c0dd65be2bea
 
 
 log close 
