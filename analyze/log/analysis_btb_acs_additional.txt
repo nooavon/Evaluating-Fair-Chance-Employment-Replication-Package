@@ -1,0 +1,672 @@
+------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\dev\Final\2004-2019/analyze/log/analysis_btb_acs_a
+> dditional.txt
+  log type:  text
+ opened on:  22 Jul 2026, 01:05:38
+
+. 
+. *** the following dataset is made in "$analyze/analysis_btb_acs_
+> correctDH.do": ***
+. use "$analysis_data/dh_acs_analysistable_corrected.dta", clear
+
+. 
+. ****************************************************************
+> ****************
+. local sample "sex == 1 & age >= 25 & age <= 34 & us_citizen == 1
+> "
+
+. local demog = "age in_school educd"
+
+. local demog_int = "age#dh_group in_school#dh_group educd#dh_grou
+> p"
+
+. ****************************************************************
+> ****************
+. 
+. 
+. ****************************************************************
+> ****************
+. ***** Public-sector employment 
+. ****************************************************************
+> ****************
+. eststo clear
+
+. 
+. local outcome "employed_public"
+
+. 
+. * appendix table a.6, column 1: all sample years, no time trends
+. eststo m1: reghdfe `outcome' BTBxBlackNH BTBxHisp BTBxWhiteNH, v
+> ce(cluster stateFIPS) absorb(dh_time#gereg#dh_group `demog_int' 
+> metroFIPS#dh_blackNH metroFIPS#dh_hisp metroFIPS#dh_whiteNH)
+(dropped 1 singleton observations)
+(MWFE estimator converged in 79 iterations)
+
+HDFE Linear regression                            Number of obs   
+> =  1,418,881
+Absorbing 7 HDFE groups                           F(   3,     50) 
+> =       2.88
+Statistics robust to heteroskedasticity           Prob > F        
+> =     0.0449
+                                                  R-squared       
+> =     0.0200
+                                                  Adj R-squared   
+> =     0.0188
+                                                  Within R-sq.    
+> =     0.0000
+Number of clusters (stateFIPS) =         51       Root MSE        
+> =     0.1746
+
+                             (Std. err. adjusted for 51 clusters i
+> n stateFIPS)
+------------------------------------------------------------------
+> ------------
+             |               Robust
+employed_p~c | Coefficient  std. err.      t    P>|t|     [95% con
+> f. interval]
+-------------+----------------------------------------------------
+> ------------
+ BTBxBlackNH |   -.002684   .0012692    -2.11   0.039    -.0052333
+>    -.0001347
+    BTBxHisp |  -.0009597   .0016599    -0.58   0.566    -.0042936
+>     .0023743
+ BTBxWhiteNH |  -.0009292   .0004911    -1.89   0.064    -.0019156
+>     .0000572
+       _cons |   .0325326   .0002097   155.11   0.000     .0321113
+>     .0329538
+------------------------------------------------------------------
+> ------------
+
+Absorbed degrees of freedom:
+------------------------------------------------------------------
+> --+
+                Absorbed FE | Categories  - Redundant  = Num. Coef
+> s                                                               
+>   |
+----------------------------+-------------------------------------
+> --|
+     dh_time#gereg#dh_group |       192           0         192   
+>                                                                 
+>   |
+               age#dh_group |        30           3          27   
+>                                                                 
+>   |
+         in_school#dh_group |         6           3           3   
+>  ?                                                              
+>   |
+             educd#dh_group |        69           3          66   
+>  ?                                                              
+>   |
+       metroFIPS#dh_blackNH |       682           4         678   
+>  ?                                                              
+>   |
+          metroFIPS#dh_hisp |       681         341         340   
+>  ?                                                              
+>   |
+       metroFIPS#dh_whiteNH |       682         343         339   
+>  ?                                                              
+>   |
+------------------------------------------------------------------
+> --+
+? = number of redundant parameters may be higher
+
+. 
+. qui summ `outcome' if (dh_blackNH == 1 & BTB == 0 & BTBever == 1
+> )
+
+. qui estadd scalar black_mean = r(mean), replace
+
+. qui estadd scalar black_percent = 100*(e(b)[1,1]/r(mean))
+
+. qui summ `outcome' if (dh_hisp == 1 & BTB == 0 & BTBever == 1)
+
+. qui estadd scalar hispanic_mean = r(mean), replace
+
+. qui estadd scalar hispanic_percent = 100*(e(b)[1,2]/r(mean))
+
+. qui summ `outcome' if (dh_whiteNH == 1 & BTB == 0 & BTBever == 1
+> )
+
+. qui estadd scalar white_mean = r(mean), replace 
+
+. qui estadd scalar white_percent = 100*(e(b)[1,3]/r(mean))
+
+. 
+. * appendix table a.6, column 2: full sample with linear time tre
+> nds
+. eststo m2: reghdfe `outcome' BTBxBlackNH BTBxHisp BTBxWhiteNH, v
+> ce(cluster stateFIPS) absorb(dh_time#gereg#dh_group `demog_int' 
+> metroFIPS#dh_blackNH##c.dh_time metroFIPS#dh_hisp##c.dh_time met
+> roFIPS#dh_whiteNH##c.dh_time)
+(dropped 1 singleton observations)
+(MWFE estimator converged in 317 iterations)
+
+HDFE Linear regression                            Number of obs   
+> =  1,418,881
+Absorbing 7 HDFE groups                           F(   3,     50) 
+> =       1.59
+Statistics robust to heteroskedasticity           Prob > F        
+> =     0.2034
+                                                  R-squared       
+> =     0.0209
+                                                  Adj R-squared   
+> =     0.0184
+                                                  Within R-sq.    
+> =     0.0000
+Number of clusters (stateFIPS) =         51       Root MSE        
+> =     0.1747
+
+                             (Std. err. adjusted for 51 clusters i
+> n stateFIPS)
+------------------------------------------------------------------
+> ------------
+             |               Robust
+employed_p~c | Coefficient  std. err.      t    P>|t|     [95% con
+> f. interval]
+-------------+----------------------------------------------------
+> ------------
+ BTBxBlackNH |  -.0009493   .0015186    -0.63   0.535    -.0039995
+>     .0021009
+    BTBxHisp |  -.0025002   .0015127    -1.65   0.105    -.0055384
+>     .0005381
+ BTBxWhiteNH |  -.0007618   .0005486    -1.39   0.171    -.0018638
+>     .0003401
+       _cons |   .0325094   .0001997   162.76   0.000     .0321082
+>     .0329105
+------------------------------------------------------------------
+> ------------
+
+Absorbed degrees of freedom:
+------------------------------------------------------------------
+> --------+
+                      Absorbed FE | Categories  - Redundant  = Num
+> . Coefs                                                         
+>         |
+----------------------------------+-------------------------------
+> --------|
+           dh_time#gereg#dh_group |       192           0         
+> 192                                                             
+>                                                                 
+>         |
+                     age#dh_group |        30           3         
+>  27                                                             
+>                                                                 
+>         |
+               in_school#dh_group |         6           3         
+>   3                                                             
+>        ?                                                        
+>         |
+                   educd#dh_group |        69           3         
+>  66                                                             
+>        ?                                                        
+>         |
+             metroFIPS#dh_blackNH |       682           4         
+> 678                                                             
+>        ?                                                        
+>         |
+   metroFIPS#dh_blackNH#c.dh_time |       682           7         
+> 675                                                             
+>        ?                                                        
+>         |
+                metroFIPS#dh_hisp |       681         341         
+> 340                                                             
+>        ?                                                        
+>         |
+      metroFIPS#dh_hisp#c.dh_time |       681           6         
+> 675                                                             
+>        ?                                                        
+>         |
+             metroFIPS#dh_whiteNH |       682         343         
+> 339                                                             
+>        ?                                                        
+>         |
+   metroFIPS#dh_whiteNH#c.dh_time |       682           7         
+> 675                                                             
+>        ?                                                        
+>         |
+------------------------------------------------------------------
+> --------+
+? = number of redundant parameters may be higher
+
+. 
+. qui summ `outcome' if (dh_blackNH == 1 & BTB == 0 & BTBever == 1
+> )
+
+. qui estadd scalar black_mean = r(mean), replace
+
+. qui estadd scalar black_percent = 100*(e(b)[1,1]/r(mean))
+
+. qui summ `outcome' if (dh_hisp == 1 & BTB == 0 & BTBever == 1)
+
+. qui estadd scalar hispanic_mean = r(mean), replace
+
+. qui estadd scalar hispanic_percent = 100*(e(b)[1,2]/r(mean))
+
+. qui summ `outcome' if (dh_whiteNH == 1 & BTB == 0 & BTBever == 1
+> )
+
+. qui estadd scalar white_mean = r(mean), replace 
+
+. qui estadd scalar white_percent = 100*(e(b)[1,3]/r(mean))
+
+. 
+. * appendix table a.6 column 3: MSAs only 
+. eststo m3: reghdfe `outcome' BTBxBlackNH BTBxHisp BTBxWhiteNH  i
+> f (metroFIPS != stateFIPS), vce(cluster stateFIPS) absorb(dh_tim
+> e#gereg#dh_group `demog_int' metroFIPS#dh_blackNH##c.dh_time met
+> roFIPS#dh_hisp##c.dh_time metroFIPS#dh_whiteNH##c.dh_time)
+(dropped 1 singleton observations)
+(MWFE estimator converged in 236 iterations)
+
+HDFE Linear regression                            Number of obs   =    954,129
+Absorbing 7 HDFE groups                           F(   3,     48) =       3.95
+Statistics robust to heteroskedasticity           Prob > F        =     0.0135
+                                                  R-squared       =     0.0210
+                                                  Adj R-squared   =     0.0178
+                                                  Within R-sq.    =     0.0000
+Number of clusters (stateFIPS) =         49       Root MSE        =     0.1747
+
+                             (Std. err. adjusted for 49 clusters in stateFIPS)
+------------------------------------------------------------------------------
+             |               Robust
+employed_p~c | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+ BTBxBlackNH |  -.0004036   .0013349    -0.30   0.764    -.0030875    .0022803
+    BTBxHisp |  -.0020675   .0016576    -1.25   0.218    -.0054003    .0012653
+ BTBxWhiteNH |  -.0018748   .0006934    -2.70   0.009     -.003269   -.0004806
+       _cons |   .0328423   .0002477   132.59   0.000     .0323442    .0333403
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+--------------------------------------------------------------------------+
+                      Absorbed FE | Categories  - Redundant  = Num. Coefs |
+----------------------------------+---------------------------------------|
+           dh_time#gereg#dh_group |       180           0         180     |
+                     age#dh_group |        30           3          27     |
+               in_school#dh_group |         6           3           3    ?|
+                   educd#dh_group |        69           3          66    ?|
+             metroFIPS#dh_blackNH |       580           4         576    ?|
+   metroFIPS#dh_blackNH#c.dh_time |       580           1         579    ?|
+                metroFIPS#dh_hisp |       579         290         289    ?|
+      metroFIPS#dh_hisp#c.dh_time |       579           0         579    ?|
+             metroFIPS#dh_whiteNH |       580         292         288    ?|
+   metroFIPS#dh_whiteNH#c.dh_time |       580           1         579    ?|
+--------------------------------------------------------------------------+
+? = number of redundant parameters may be higher
+
+. 
+. qui summ `outcome' if (dh_blackNH == 1 & BTB == 0 & BTBever == 1 & metroFIPS != stateFIPS)
+
+. qui estadd scalar black_mean = r(mean), replace
+
+. qui estadd scalar black_percent = 100*(e(b)[1,1]/r(mean))
+
+. qui summ `outcome' if (dh_hisp == 1 & BTB == 0 & BTBever == 1 & metroFIPS != stateFIPS)
+
+. qui estadd scalar hispanic_mean = r(mean), replace
+
+. qui estadd scalar hispanic_percent = 100*(e(b)[1,2]/r(mean))
+
+. qui summ `outcome' if (dh_whiteNH == 1 & BTB == 0 & BTBever == 1 & metroFIPS != stateFIPS)
+
+. qui estadd scalar white_mean = r(mean), replace 
+
+. qui estadd scalar white_percent = 100*(e(b)[1,3]/r(mean))
+
+. 
+. * appendix table a.6, column 4: BTB adopting-only 
+. eststo m4: reghdfe `outcome' BTBxBlackNH BTBxHisp BTBxWhiteNH if (BTBever == 1), vce(cluster stateFIPS) absorb(dh_time#gereg#dh_group `demog_int' metroFIPS#dh_blackNH##c.dh_time metroFIPS#dh_hisp##c.dh_time metroFIPS#dh_whiteNH
+> ##c.dh_time)
+(MWFE estimator converged in 239 iterations)
+
+HDFE Linear regression                            Number of obs   =  1,147,397
+Absorbing 7 HDFE groups                           F(   3,     42) =       2.81
+Statistics robust to heteroskedasticity           Prob > F        =     0.0508
+                                                  R-squared       =     0.0202
+                                                  Adj R-squared   =     0.0180
+                                                  Within R-sq.    =     0.0000
+Number of clusters (stateFIPS) =         43       Root MSE        =     0.1725
+
+                             (Std. err. adjusted for 43 clusters in stateFIPS)
+------------------------------------------------------------------------------
+             |               Robust
+employed_p~c | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+ BTBxBlackNH |  -.0005208   .0013766    -0.38   0.707    -.0032988    .0022573
+    BTBxHisp |  -.0031631   .0014727    -2.15   0.038    -.0061352    -.000191
+ BTBxWhiteNH |  -.0010287    .000516    -1.99   0.053    -.0020701    .0000127
+       _cons |   .0318653    .000232   137.34   0.000      .031397    .0323335
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+--------------------------------------------------------------------------+
+                      Absorbed FE | Categories  - Redundant  = Num. Coefs |
+----------------------------------+---------------------------------------|
+           dh_time#gereg#dh_group |       192           0         192     |
+                     age#dh_group |        30           3          27     |
+               in_school#dh_group |         6           3           3    ?|
+                   educd#dh_group |        69           3          66    ?|
+             metroFIPS#dh_blackNH |       464           4         460    ?|
+   metroFIPS#dh_blackNH#c.dh_time |       464           0         464    ?|
+                metroFIPS#dh_hisp |       464         232         232    ?|
+      metroFIPS#dh_hisp#c.dh_time |       464           0         464    ?|
+             metroFIPS#dh_whiteNH |       464         233         231    ?|
+   metroFIPS#dh_whiteNH#c.dh_time |       464           0         464    ?|
+--------------------------------------------------------------------------+
+? = number of redundant parameters may be higher
+
+. 
+. qui summ `outcome' if (dh_blackNH == 1 & BTB == 0 & BTBever == 1 & BTBever == 1)
+
+. qui estadd scalar black_mean = r(mean), replace
+
+. qui estadd scalar black_percent = 100*(e(b)[1,1]/r(mean))
+
+. qui summ `outcome' if (dh_hisp == 1 & BTB == 0 & BTBever == 1 & BTBever == 1)
+
+. qui estadd scalar hispanic_mean = r(mean), replace
+
+. qui estadd scalar hispanic_percent = 100*(e(b)[1,2]/r(mean))
+
+. qui summ `outcome' if (dh_whiteNH == 1 & BTB == 0 & BTBever == 1 & BTBever == 1)
+
+. qui estadd scalar white_mean = r(mean), replace 
+
+. qui estadd scalar white_percent = 100*(e(b)[1,3]/r(mean))
+
+. 
+. * appendix table a.6, column 5: full sample, 2008 and later 
+. eststo m5: reghdfe `outcome' BTBxBlackNH BTBxHisp BTBxWhiteNH if (year >= 2008), vce(cluster stateFIPS) absorb(dh_time#gereg#dh_group `demog_int' metroFIPS#dh_blackNH##c.dh_time metroFIPS#dh_hisp##c.dh_time metroFIPS#dh_whiteNH
+> ##c.dh_time)
+(dropped 4 singleton observations)
+(MWFE estimator converged in 237 iterations)
+
+HDFE Linear regression                            Number of obs   =  1,129,985
+Absorbing 7 HDFE groups                           F(   3,     50) =       1.87
+Statistics robust to heteroskedasticity           Prob > F        =     0.1468
+                                                  R-squared       =     0.0211
+                                                  Adj R-squared   =     0.0180
+                                                  Within R-sq.    =     0.0000
+Number of clusters (stateFIPS) =         51       Root MSE        =     0.1719
+
+                             (Std. err. adjusted for 51 clusters in stateFIPS)
+------------------------------------------------------------------------------
+             |               Robust
+employed_p~c | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+ BTBxBlackNH |   -.000462   .0019836    -0.23   0.817    -.0044462    .0035221
+    BTBxHisp |  -.0034431   .0014632    -2.35   0.023    -.0063821   -.0005041
+ BTBxWhiteNH |   .0000402    .000573     0.07   0.944    -.0011107    .0011912
+       _cons |   .0313934   .0002592   121.13   0.000     .0308729     .031914
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+--------------------------------------------------------------------------+
+                      Absorbed FE | Categories  - Redundant  = Num. Coefs |
+----------------------------------+---------------------------------------|
+           dh_time#gereg#dh_group |       144           0         144     |
+                     age#dh_group |        30           3          27     |
+               in_school#dh_group |         6           3           3    ?|
+                   educd#dh_group |        57           3          54    ?|
+             metroFIPS#dh_blackNH |       675           4         671    ?|
+   metroFIPS#dh_blackNH#c.dh_time |       675           1         674    ?|
+                metroFIPS#dh_hisp |       673         338         335    ?|
+      metroFIPS#dh_hisp#c.dh_time |       673           0         673    ?|
+             metroFIPS#dh_whiteNH |       676         341         335    ?|
+   metroFIPS#dh_whiteNH#c.dh_time |       676           1         675    ?|
+--------------------------------------------------------------------------+
+? = number of redundant parameters may be higher
+
+. 
+. qui summ `outcome' if (dh_blackNH == 1 & BTB == 0 & BTBever == 1 & year >= 2008)
+
+. qui estadd scalar black_mean = r(mean), replace
+
+. qui estadd scalar black_percent = 100*(e(b)[1,1]/r(mean))
+
+. qui summ `outcome' if (dh_hisp == 1 & BTB == 0 & BTBever == 1 & year >= 2008)
+
+. qui estadd scalar hispanic_mean = r(mean), replace
+
+. qui estadd scalar hispanic_percent = 100*(e(b)[1,2]/r(mean))
+
+. qui summ `outcome' if (dh_whiteNH == 1 & BTB == 0 & BTBever == 1 & year >= 2008)
+
+. qui estadd scalar white_mean = r(mean), replace 
+
+. qui estadd scalar white_percent = 100*(e(b)[1,3]/r(mean))
+
+. 
+. 
+. local include_models "m1 m2 m3 m4 m5"
+
+. 
+. * Output regression table
+. estfe `include_models', labels(metroFIPS "MSA FE" dh_time#gereg "Year-Region FE" age#dh_group "Demographics" metroFIPS#c.dh_time "MSA-Specific Trends")
+
+. 
+. esttab `include_models' using "$out/tableA6.rtf", replace compress noconstant se(4) b(4) r2(4) nogaps indicate(`r(indicate_fe)') noomitted nobase scalars("black_mean Pre-BTB Mean: Black" "hispanic_mean Pre-BTB Mean: Hispanic" "
+> white_mean Pre-BTB Mean: White" "black_percent \% Effect: Black" "hispanic_percent \% Effect: Hispanic" "white_percent \% Effect: White") sfmt(4 4 4 2 2 2) nomtitles keep(BTBx*) coeflabels(BTBxWhiteNH "BTB x White" BTBxBlackNH 
+> "BTB x Black" BTBxHisp "BTB x Hispanic") star(* 0.10 ** 0.05 *** 0.01)
+(output written to C:\dev\Final\2004-2019/analyze/out/tableA6.rtf)
+
+. 
+. 
+. ********************************************************************************
+. ***** Account for differences with CPS (GQs and survey weights)
+. ********************************************************************************
+. eststo clear
+
+. 
+. local outcome "employed"
+
+. 
+. * appendix table a.7, column 3: estimate ACS treatment effects with provided sample weights
+. eststo m1: reghdfe `outcome' BTBxBlackNH BTBxHisp BTBxWhiteNH  if (year >= 2008) [aw = perwt], vce(cluster stateFIPS) absorb(dh_time#gereg#dh_group `demog_int' metroFIPS#dh_blackNH##c.dh_time metroFIPS#dh_hisp##c.dh_time metroF
+> IPS#dh_whiteNH##c.dh_time)
+(dropped 4 singleton observations)
+(MWFE estimator converged in 345 iterations)
+
+HDFE Linear regression                            Number of obs   =  1,129,985
+Absorbing 7 HDFE groups                           F(   3,     50) =       0.34
+Statistics robust to heteroskedasticity           Prob > F        =     0.7955
+                                                  R-squared       =     0.1192
+                                                  Adj R-squared   =     0.1164
+                                                  Within R-sq.    =     0.0000
+Number of clusters (stateFIPS) =         51       Root MSE        =     0.4131
+
+                             (Std. err. adjusted for 51 clusters in stateFIPS)
+------------------------------------------------------------------------------
+             |               Robust
+    employed | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+ BTBxBlackNH |   .0017921   .0049985     0.36   0.721    -.0082477    .0118319
+    BTBxHisp |   .0009573   .0050579     0.19   0.851    -.0092018    .0111164
+ BTBxWhiteNH |   .0019669   .0021704     0.91   0.369    -.0023924    .0063262
+       _cons |   .7376928   .0009093   811.30   0.000     .7358664    .7395191
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+--------------------------------------------------------------------------+
+                      Absorbed FE | Categories  - Redundant  = Num. Coefs |
+----------------------------------+---------------------------------------|
+           dh_time#gereg#dh_group |       144           0         144     |
+                     age#dh_group |        30           3          27     |
+               in_school#dh_group |         6           3           3    ?|
+                   educd#dh_group |        57           3          54    ?|
+             metroFIPS#dh_blackNH |       675           4         671    ?|
+   metroFIPS#dh_blackNH#c.dh_time |       675           1         674    ?|
+                metroFIPS#dh_hisp |       673         338         335    ?|
+      metroFIPS#dh_hisp#c.dh_time |       673           0         673    ?|
+             metroFIPS#dh_whiteNH |       676         341         335    ?|
+   metroFIPS#dh_whiteNH#c.dh_time |       676           1         675    ?|
+--------------------------------------------------------------------------+
+? = number of redundant parameters may be higher
+
+. 
+. qui summ `outcome' if (dh_blackNH == 1 & BTB == 0 & BTBever == 1 & metroFIPS != stateFIPS & year >= 2008) [aw = perwt]
+
+. qui estadd scalar black_mean = r(mean), replace
+
+. qui estadd scalar black_percent = 100*(e(b)[1,1]/r(mean))
+
+. qui summ `outcome' if (dh_hisp == 1 & BTB == 0 & BTBever == 1 & metroFIPS != stateFIPS & year >= 2008) [aw = perwt]
+
+. qui estadd scalar hispanic_mean = r(mean), replace
+
+. qui estadd scalar hispanic_percent = 100*(e(b)[1,2]/r(mean))
+
+. qui summ `outcome' if (dh_whiteNH == 1 & BTB == 0 & BTBever == 1 & metroFIPS != stateFIPS & year >= 2008) [aw = perwt]
+
+. qui estadd scalar white_mean = r(mean), replace 
+
+. qui estadd scalar white_percent = 100*(e(b)[1,3]/r(mean))
+
+. 
+. * appendix table a.7, column 4: drop individuals living in group quarters (unweighted)
+. eststo m2: reghdfe `outcome' BTBxBlackNH BTBxHisp BTBxWhiteNH  if ((year >= 2008) & (gq != 3 & gq != 4)), vce(cluster stateFIPS) absorb(dh_time#gereg#dh_group `demog_int' metroFIPS#dh_blackNH##c.dh_time metroFIPS#dh_hisp##c.dh_
+> time metroFIPS#dh_whiteNH##c.dh_time)
+(dropped 5 singleton observations)
+(MWFE estimator converged in 227 iterations)
+
+HDFE Linear regression                            Number of obs   =    996,833
+Absorbing 7 HDFE groups                           F(   3,     50) =       0.71
+Statistics robust to heteroskedasticity           Prob > F        =     0.5509
+                                                  R-squared       =     0.0780
+                                                  Adj R-squared   =     0.0747
+                                                  Within R-sq.    =     0.0000
+Number of clusters (stateFIPS) =         51       Root MSE        =     0.3904
+
+                             (Std. err. adjusted for 51 clusters in stateFIPS)
+------------------------------------------------------------------------------
+             |               Robust
+    employed | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+ BTBxBlackNH |   .0054616   .0051573     1.06   0.295    -.0048971    .0158203
+    BTBxHisp |   .0046084   .0034396     1.34   0.186    -.0023003    .0115171
+ BTBxWhiteNH |   .0000842    .001779     0.05   0.962    -.0034891    .0036575
+       _cons |   .7912223   .0007605  1040.35   0.000     .7896947    .7927499
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+--------------------------------------------------------------------------+
+                      Absorbed FE | Categories  - Redundant  = Num. Coefs |
+----------------------------------+---------------------------------------|
+           dh_time#gereg#dh_group |       144           0         144     |
+                     age#dh_group |        30           3          27     |
+               in_school#dh_group |         6           3           3    ?|
+                   educd#dh_group |        57           3          54    ?|
+             metroFIPS#dh_blackNH |       674           4         670    ?|
+   metroFIPS#dh_blackNH#c.dh_time |       674           2         672    ?|
+                metroFIPS#dh_hisp |       673         338         335    ?|
+      metroFIPS#dh_hisp#c.dh_time |       673           0         673    ?|
+             metroFIPS#dh_whiteNH |       676         343         333    ?|
+   metroFIPS#dh_whiteNH#c.dh_time |       676           1         675    ?|
+--------------------------------------------------------------------------+
+? = number of redundant parameters may be higher
+
+. 
+. qui summ `outcome' if (dh_blackNH == 1 & BTB == 0 & BTBever == 1 & metroFIPS != stateFIPS & year >= 2008 & (gq != 3 & gq != 4))
+
+. qui estadd scalar black_mean = r(mean), replace
+
+. qui estadd scalar black_percent = 100*(e(b)[1,1]/r(mean))
+
+. qui summ `outcome' if (dh_hisp == 1 & BTB == 0 & BTBever == 1 & metroFIPS != stateFIPS & year >= 2008 & (gq != 3 & gq != 4))
+
+. qui estadd scalar hispanic_mean = r(mean), replace
+
+. qui estadd scalar hispanic_percent = 100*(e(b)[1,2]/r(mean))
+
+. qui summ `outcome' if (dh_whiteNH == 1 & BTB == 0 & BTBever == 1 & metroFIPS != stateFIPS & year >= 2008 & (gq != 3 & gq != 4))
+
+. qui estadd scalar white_mean = r(mean), replace 
+
+. qui estadd scalar white_percent = 100*(e(b)[1,3]/r(mean))
+
+. 
+. * appendix table a.7, column 5: drop individuals living in group quarters (weighted)
+. eststo m3: reghdfe `outcome' BTBxBlackNH BTBxHisp BTBxWhiteNH  if ((year >= 2008) & (gq != 3 & gq != 4)) [aw = perwt], vce(cluster stateFIPS) absorb(dh_time#gereg#dh_group `demog_int' metroFIPS#dh_blackNH##c.dh_time metroFIPS#d
+> h_hisp##c.dh_time metroFIPS#dh_whiteNH##c.dh_time)
+(dropped 5 singleton observations)
+(MWFE estimator converged in 327 iterations)
+
+HDFE Linear regression                            Number of obs   =    996,833
+Absorbing 7 HDFE groups                           F(   3,     50) =       0.34
+Statistics robust to heteroskedasticity           Prob > F        =     0.7988
+                                                  R-squared       =     0.0800
+                                                  Adj R-squared   =     0.0767
+                                                  Within R-sq.    =     0.0000
+Number of clusters (stateFIPS) =         51       Root MSE        =     0.3966
+
+                             (Std. err. adjusted for 51 clusters in stateFIPS)
+------------------------------------------------------------------------------
+             |               Robust
+    employed | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+ BTBxBlackNH |    .003693   .0053178     0.69   0.491    -.0069881    .0143741
+    BTBxHisp |    .001202   .0050262     0.24   0.812    -.0088934    .0112973
+ BTBxWhiteNH |   .0013339   .0020745     0.64   0.523    -.0028328    .0055006
+       _cons |   .7813438   .0009493   823.05   0.000      .779437    .7832505
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+--------------------------------------------------------------------------+
+                      Absorbed FE | Categories  - Redundant  = Num. Coefs |
+----------------------------------+---------------------------------------|
+           dh_time#gereg#dh_group |       144           0         144     |
+                     age#dh_group |        30           3          27     |
+               in_school#dh_group |         6           3           3    ?|
+                   educd#dh_group |        57           3          54    ?|
+             metroFIPS#dh_blackNH |       674           4         670    ?|
+   metroFIPS#dh_blackNH#c.dh_time |       674           2         672    ?|
+                metroFIPS#dh_hisp |       673         338         335    ?|
+      metroFIPS#dh_hisp#c.dh_time |       673           0         673    ?|
+             metroFIPS#dh_whiteNH |       676         343         333    ?|
+   metroFIPS#dh_whiteNH#c.dh_time |       676           1         675    ?|
+--------------------------------------------------------------------------+
+? = number of redundant parameters may be higher
+
+. 
+. qui summ `outcome' if (dh_blackNH == 1 & BTB == 0 & BTBever == 1 & metroFIPS != stateFIPS & year >= 2008 & (gq != 3 & gq != 4)) [aw = perwt]
+
+. qui estadd scalar black_mean = r(mean), replace
+
+. qui estadd scalar black_percent = 100*(e(b)[1,1]/r(mean))
+
+. qui summ `outcome' if (dh_hisp == 1 & BTB == 0 & BTBever == 1 & metroFIPS != stateFIPS & year >= 2008 & (gq != 3 & gq != 4)) [aw = perwt]
+
+. qui estadd scalar hispanic_mean = r(mean), replace
+
+. qui estadd scalar hispanic_percent = 100*(e(b)[1,2]/r(mean))
+
+. qui summ `outcome' if (dh_whiteNH == 1 & BTB == 0 & BTBever == 1 & metroFIPS != stateFIPS & year >= 2008 & (gq != 3 & gq != 4)) [aw = perwt]
+
+. qui estadd scalar white_mean = r(mean), replace 
+
+. qui estadd scalar white_percent = 100*(e(b)[1,3]/r(mean))
+
+. 
+. 
+. local include_models "m*"
+
+. 
+. * Output regression table
+. estfe `include_models', labels(metroFIPS "MSA FE" metroFIPS#group "MSA FE" year#division "Year-Region FE" year#division#group "Year-Region FE" year#division "Year-Division FE" age#group "Demographics" metroFIPS#c.year "MSA-Spec
+> ific Trends")
+
+. 
+. esttab `include_models' using "$out/tableA7columns345.rtf", replace compress noconstant se(4) b(4) r2(4) nogaps indicate(`r(indicate_fe)') noomitted nobase scalars("black_mean Pre-BTB Mean: Black" "hispanic_mean Pre-BTB Mean: H
+> ispanic" "white_mean Pre-BTB Mean: White" "black_percent \% Effect: Black" "hispanic_percent \% Effect: Hispanic" "white_percent \% Effect: White") sfmt(4 4 4 2 2 2) keep(BTBx*) coeflabels(BTBxWhiteNH "BTB x White" BTBxBlackNH 
+> "BTB x Black" BTBxHisp "BTB x Hispanic") star(* 0.10 ** 0.05 *** 0.01) mtitles("Drop Obs in Group Quarters" "With Sample Weights")
+(output written to C:\dev\Final\2004-2019/analyze/out/tableA7columns345.rtf)
+
+. 
+. 
+. log close
+      name:  <unnamed>
+       log:  C:\dev\Final\2004-2019/analyze/log/analysis_btb_acs_additional.txt
+  log type:  text
+ closed on:  22 Jul 2026, 01:54:28
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

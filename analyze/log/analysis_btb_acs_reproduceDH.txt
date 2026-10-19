@@ -1,0 +1,361 @@
+----------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\dev\Final\2004-2019/analyze/log/analysis_btb_acs_reproduceDH.txt
+  log type:  text
+ opened on:   6 Aug 2026, 17:15:54
+
+. 
+. ********************************************************************************
+. local sample "sex == 1 & age >= 25 & age <= 34 & us_citizen == 1"
+
+. local demog = "age in_school educd"
+
+. local demog_int = "age#dh_group in_school#dh_group educd#dh_group"
+
+. 
+. ********************************************************************************
+. 
+. *** the following dataset is made in "$build/build_acs_data.do": ***
+. use "$analysis_data/btb_acs_analysis_table.dta", clear
+
+. 
+. 
+. fvset base 2 metroFIPS
+
+. fvset base 60 age
+
+. fvset base 2004 year
+
+. 
+. ***** Get cell counts
+. * Per year
+. preserve
+
+. keep if `sample'
+(19,512,351 observations deleted)
+
+. keep if (no_coll_deg == 1)
+(897,491 observations deleted)
+
+. 
+. keep if (metroFIPS != stateFIPS)
+(464,752 observations deleted)
+
+. 
+. gen n = 1
+
+. collapse (sum) n, by(year metroFIPS dh_group dh_blackNH dh_whiteNH dh_hisp)
+
+. bys dh_group: summ n, detail
+
+----------------------------------------------------------------------------------
+-> dh_group = White, non-Hispanic
+
+                           (sum) n
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%           10              1
+ 5%           20              1
+10%           26              2       Obs               3,934
+25%           40              2       Sum of wgt.       3,934
+
+50%           73                      Mean           152.3599
+                        Largest       Std. dev.      209.6403
+75%          159           1779
+90%          414           1805       Variance       43949.04
+95%          569           1816       Skewness       3.340973
+99%          994           1834       Kurtosis       18.51548
+
+----------------------------------------------------------------------------------
+-> dh_group = Black, non-Hispanic
+
+                           (sum) n
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            1              1
+ 5%            1              1
+10%            1              1       Obs               5,614
+25%            2              1       Sum of wgt.       5,614
+
+50%            6                      Mean           28.84717
+                        Largest       Std. dev.      74.08209
+75%           20            915
+90%           69            917       Variance       5488.157
+95%          121            927       Skewness       6.031877
+99%          375            937       Kurtosis       52.21532
+
+----------------------------------------------------------------------------------
+-> dh_group = Hispanic
+
+                           (sum) n
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            1              1
+ 5%            1              1
+10%            2              1       Obs               3,639
+25%            4              1       Sum of wgt.       3,639
+
+50%           11                      Mean           52.98104
+                        Largest       Std. dev.      159.3386
+75%           34           2158
+90%          125           2339       Variance        25388.8
+95%          199           2342       Skewness       7.978873
+99%          724           2430       Kurtosis        88.1418
+
+
+. 
+. restore
+
+. 
+. 
+. preserve
+
+. keep if `sample'
+(19,512,351 observations deleted)
+
+. keep if (no_coll_deg == 1)
+(897,491 observations deleted)
+
+. 
+. keep if (metroFIPS != stateFIPS)
+(464,752 observations deleted)
+
+. 
+. keep if (dhBTB == 1)
+(815,714 observations deleted)
+
+. gen n = 1
+
+. collapse (sum) n, by(year metroFIPS dh_group dh_blackNH dh_whiteNH dh_hisp)
+
+. bys dh_group: summ n, detail
+
+----------------------------------------------------------------------------------
+-> dh_group = White, non-Hispanic
+
+                           (sum) n
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            9              8
+ 5%           17              9
+10%           27              9       Obs                 322
+25%           45              9       Sum of wgt.         322
+
+50%          118                      Mean           246.8571
+                        Largest       Std. dev.      298.7725
+75%          378           1129
+90%          592           1775       Variance       89265.02
+95%          753           1816       Skewness       2.223975
+99%         1129           1834       Kurtosis       9.561275
+
+----------------------------------------------------------------------------------
+-> dh_group = Black, non-Hispanic
+
+                           (sum) n
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            1              1
+ 5%            1              1
+10%            1              1       Obs                 520
+25%            2              1       Sum of wgt.         520
+
+50%            8                      Mean           46.95192
+                        Largest       Std. dev.      108.1034
+75%           31            523
+90%        119.5            878       Variance       11686.33
+95%          247            908       Skewness        4.43231
+99%          475            915       Kurtosis         28.078
+
+----------------------------------------------------------------------------------
+-> dh_group = Hispanic
+
+                           (sum) n
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            1              1
+ 5%            2              1
+10%            6              1       Obs                 316
+25%           17              1       Sum of wgt.         316
+
+50%           37                      Mean           109.2184
+                        Largest       Std. dev.      246.3687
+75%         98.5           1836
+90%          237           1846       Variance       60697.54
+95%          417           1875       Skewness       5.378487
+99%         1836           1964       Kurtosis        36.2157
+
+
+. 
+. restore
+
+. 
+. 
+. ***** Save table for use in CPS-ACS matching MSA-years specifications (Table A.8
+> )
+. preserve
+
+. keep if `sample'
+(19,512,351 observations deleted)
+
+. keep if (no_coll_deg == 1)
+(897,491 observations deleted)
+
+. 
+. save "$analysis_data/dh_acs_analysistable_cps_acs_matching.dta", replace 
+file
+    C:\dev\Final\2004-2019/build/analysis_data/dh_acs_analysistable_cps_acs_matc
+    > hing.dta saved
+
+. 
+. restore
+
+. 
+. *** analysis dataset ***
+. keep if `sample'
+(19,512,351 observations deleted)
+
+. keep if (dh_noCollege == 1)
+(700,334 observations deleted)
+
+. 
+. 
+. ***** Regressions **************************************************************
+. eststo clear
+
+. 
+. local outcome "employed"
+
+. 
+. * appendix table a.3, column 1: full sample with linear time trends
+. eststo m1: reghdfe `outcome' dhBTBxBlackNH dhBTBxHisp dhBTBxWhiteNH, vce(cluster
+>  stateFIPS) absorb(dh_time#gereg#dh_group `demog_int' metroFIPS#dh_blackNH##c.dh
+> _time metroFIPS#dh_hisp##c.dh_time metroFIPS##c.dh_time)
+(dropped 3 singleton observations)
+(MWFE estimator converged in 45 iterations)
+
+HDFE Linear regression                            Number of obs   =  1,062,573
+Absorbing 7 HDFE groups                           F(   3,     50) =       1.01
+Statistics robust to heteroskedasticity           Prob > F        =     0.3966
+                                                  R-squared       =     0.1567
+                                                  Adj R-squared   =     0.1544
+                                                  Within R-sq.    =     0.0000
+Number of clusters (stateFIPS) =         51       Root MSE        =     0.4023
+
+                              (Std. err. adjusted for 51 clusters in stateFIPS)
+-------------------------------------------------------------------------------
+              |               Robust
+     employed | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+--------------+----------------------------------------------------------------
+dhBTBxBlackNH |  -.0050657   .0053256    -0.95   0.346    -.0157625     .005631
+   dhBTBxHisp |   .0160396   .0108291     1.48   0.145    -.0057112    .0377905
+dhBTBxWhiteNH |   .0034371   .0041183     0.83   0.408    -.0048347     .011709
+        _cons |   .7411876   .0006419  1154.62   0.000     .7398983     .742477
+-------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+--------------------------------------------------------------------------+
+                      Absorbed FE | Categories  - Redundant  = Num. Coefs |
+----------------------------------+---------------------------------------|
+           dh_time#gereg#dh_group |       132           0         132     |
+                     age#dh_group |        30           3          27     |
+               in_school#dh_group |         6           3           3    ?|
+                   educd#dh_group |        72           3          69    ?|
+             metroFIPS#dh_blackNH |       679           4         675    ?|
+   metroFIPS#dh_blackNH#c.dh_time |       679           6         673    ?|
+                metroFIPS#dh_hisp |       681         341         340    ?|
+      metroFIPS#dh_hisp#c.dh_time |       681           7         674    ?|
+                        metroFIPS |       341         341           0    ?|
+              metroFIPS#c.dh_time |       341           3         338    ?|
+--------------------------------------------------------------------------+
+? = number of redundant parameters may be higher
+
+. 
+. qui summ `outcome' if (dh_blackNH == 1 & dhBTB == 0 & dhBTBever == 1)
+
+. qui estadd scalar black_mean = r(mean), replace
+
+. qui estadd scalar black_percent = 100*(e(b)[1,1]/r(mean))
+
+. qui summ `outcome' if (dh_hisp == 1 & dhBTB == 0 & dhBTBever == 1)
+
+. qui estadd scalar hispanic_mean = r(mean), replace
+
+. qui estadd scalar hispanic_percent = 100*(e(b)[1,2]/r(mean))
+
+. qui summ `outcome' if (dh_whiteNH == 1 & dhBTB == 0 & dhBTBever == 1)
+
+. qui estadd scalar white_mean = r(mean), replace 
+
+. qui estadd scalar white_percent = 100*(e(b)[1,3]/r(mean))
+
+. 
+. * appendix table a.3, column 2 (Doleac and Hansen, 2020, table a.13, column 2): 
+> MSAs only 
+. eststo m2: reghdfe `outcome' dhBTBxBlackNH dhBTBxHisp dhBTBxWhiteNH  if (metroFI
+> PS != stateFIPS), vce(cluster stateFIPS) absorb(dh_time#gereg#dh_group `demog_in
+> t' metroFIPS#dh_blackNH##c.dh_time metroFIPS#dh_hisp##c.dh_time metroFIPS##c.dh_
+> time)
+(dropped 3 singleton observations)
+(MWFE estimator converged in 35 iterations)
+
+HDFE Linear regression                            Number of obs   =    704,859
+Absorbing 7 HDFE groups                           F(   3,     48) =       0.70
+Statistics robust to heteroskedasticity           Prob > F        =     0.5575
+                                                  R-squared       =     0.1404
+                                                  Adj R-squared   =     0.1373
+                                                  Within R-sq.    =     0.0000
+Number of clusters (stateFIPS) =         49       Root MSE        =     0.4032
+
+                              (Std. err. adjusted for 49 clusters in stateFIPS)
+-------------------------------------------------------------------------------
+              |               Robust
+     employed | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+--------------+----------------------------------------------------------------
+dhBTBxBlackNH |  -.0048834   .0046964    -1.04   0.304    -.0143262    .0045593
+   dhBTBxHisp |   .0130259   .0129332     1.01   0.319    -.0129781    .0390299
+dhBTBxWhiteNH |   .0030855   .0046155     0.67   0.507    -.0061945    .0123655
+        _cons |   .7472171   .0009861   757.79   0.000     .7452345    .7491997
+-------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+--------------------------------------------------------------------------+
+                      Absorbed FE | Categories  - Redundant  = Num. Coefs |
+----------------------------------+---------------------------------------|
+           dh_time#gereg#dh_group |       120           0         120     |
+                     age#dh_group |        30           3          27     |
+               in_school#dh_group |         6           3           3    ?|
+                   educd#dh_group |        72           3          69    ?|
+             metroFIPS#dh_blackNH |       577           4         573    ?|
+   metroFIPS#dh_blackNH#c.dh_time |       577           0         577    ?|
+                metroFIPS#dh_hisp |       579         290         289    ?|
+      metroFIPS#dh_hisp#c.dh_time |       579           1         578    ?|
+                        metroFIPS |       290         290           0    ?|
+              metroFIPS#c.dh_time |       290           0         290    ?|
+--------------------------------------------------------------------------+
+? = number of redundant parameters may be higher
+
+. 
+. qui summ `outcome' if (dh_blackNH == 1 & dhBTB == 0 & dhBTBever == 1 & metroFIPS
+>  != stateFIPS)
+--Break--
+r(1);
+--Break--
+r(1);
+
+end of do-file
+
+--Break--
+r(1);
+
+. do "C:\Users\nooav\AppData\Local\Temp\STD4d20_000001.tmp"
+
+. include "$analyze/analysis_btb_acs_correctDH.do"
+
+. * BTB: Corrected ACS results in Doleac and Hansen (2020)
+. * Use corrected policy assignment variable (BTB instead of dhBTB)
+. * Correctly specify the fully-interacted linear time trends
+. * Exclude individuals with an Associate Degree
+. 
+. set more off
+
+. capture log close

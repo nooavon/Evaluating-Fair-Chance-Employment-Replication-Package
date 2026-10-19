@@ -1,0 +1,486 @@
+* 00000012
+*! version 1.0.0
+* Do not erase or edit this file
+* It is used by Stata to track the ado and help
+* files you have installed.
+
+S http://fmwww.bc.edu/repec/bocode/r
+N reghdfe.pkg
+D 17 Jul 2026
+U 1
+d 'REGHDFE': module to perform linear or instrumental-variable regression absorbing any number of high-dimensional fixed effects
+d 
+d  reghdfe fits a linear or instrumental-variable regression
+d absorbing an arbitrary number of categorical factors and
+d factorial interactions Optionally, it saves the estimated fixed
+d effects.
+d 
+d KW: regression
+d KW: instrumental variables
+d KW: fixed effects
+d KW: high dimension fixed effects
+d 
+d Requires: Stata version 11.2 and ftools from SSC (q.v.)
+d 
+d Distribution-Date: 20260111
+d 
+d Author: Sergio Correia, Board of Governors of the Federal Reserve System
+d Support: email sergio.correia@@gmail.com
+d 
+d Author: Noah Constantine, Board of Governors of the Federal Reserve System
+d Support: email
+d 
+f r\reghdfe.ado
+f r\reghdfe.mata
+f r\reghdfe5.mata
+f r\reghdfe3.ado
+f r\reghdfe_p.ado
+f r\reghdfe3_p.ado
+f r\reghdfe5.ado
+f r\reghdfe5_p.ado
+f r\reghdfe_estat.ado
+f r\reghdfe3_estat.ado
+f r\reghdfe5_estat.ado
+f r\reghdfe5_parse.ado
+f r\reghdfe_footnote.ado
+f r\reghdfe3_footnote.ado
+f r\reghdfe5_footnote.ado
+f e\estfe.ado
+f r\reghdfe_header.ado
+f r\reghdfe5_header.ado
+f r\reghdfe5_parse.ado
+f r\reghdfe.sthlp
+f r\reghdfe3.sthlp
+f r\reghdfe5.sthlp
+f r\reghdfe.mata
+f r\reghdfe_programming.sthlp
+e
+S http://fmwww.bc.edu/repec/bocode/f
+N ftools.pkg
+D 17 Jul 2026
+U 2
+d 'FTOOLS': module to provide alternatives to common Stata commands optimized for large datasets
+d 
+d  ftools consists of a Mata file and several Stata commands: The
+d Mata file creates identifiers (factors) from variables by using
+d hash functions instead of sorting the data, so it runs in time
+d O(N) and not in O(N log N). The Stata commands exploit this to
+d avoid sort operations,  at the cost of being slower for small
+d datasets (mainly because of the cost involved in moving data from
+d Stata to Mata). Implemented commands are fcollapse, fegen group,
+d and fsort. Note that most of the capabilities of levels and
+d contract are already supported by these commands. Possible
+d commands include more egen functions and merge and reshape
+d alternatives.
+d 
+d KW: levels
+d KW: collapse
+d KW: contract
+d KW: egen
+d KW: sort
+d KW: factor variables
+d KW: Mata
+d 
+d Requires: Stata version 11.2 (Stata 12 or older also require boottest from SSC)
+d 
+d Distribution-Date: 20260111
+d 
+d Author: Sergio Correia, Board of Governors of the Federal Reserve System
+d Support: email sergio.correia@@gmail.com
+d 
+f f\ftools.ado
+f f\ftools.mata
+f f\ftools.sthlp
+f f\fcollapse.ado
+f f\fcollapse.sthlp
+f f\fegen.ado
+f f\fegen_group.ado
+f f\fegen.sthlp
+f f\fisid.ado
+f f\fisid.sthlp
+f f\flevelsof.ado
+f f\flevelsof.sthlp
+f f\fmerge.ado
+f f\fmerge.sthlp
+f f\freshape.ado
+f f\fsort.ado
+f f\fsort.sthlp
+f f\ftab.ado
+f j\join.ado
+f j\join.sthlp
+f l\local_inlist.ado
+f l\local_inlist.sthlp
+f f\fcollapse_functions.mata
+f f\fcollapse_main.mata
+f f\ftools_type_aliases.mata
+f f\ftools.mata
+f f\ftools_common.mata
+f f\ftools_hash1.mata
+f f\ftools_main.mata
+f f\ftools_experimental.mata
+f f\ftools_plugin.mata
+f f\ftools_type_aliases.mata
+f m\ms_compile_mata.ado
+f m\ms_expand_varlist.ado
+f m\ms_fvstrip.ado
+f m\ms_fvstrip.sthlp
+f m\ms_fvunab.ado
+f m\ms_get_version.ado
+f m\ms_parse_absvars.ado
+f m\ms_parse_depvar.ado
+f m\ms_parse_varlist.ado
+f m\ms_parse_vce.ado
+f m\ms_add_comma.ado
+f p\parallel_map_template.do.ado
+f p\parallel_map.ado
+f p\parallel_map.sthlp
+e
+S http://fmwww.bc.edu/repec/bocode/e
+N estout.pkg
+D 17 Jul 2026
+U 3
+d 'ESTOUT': module to make regression tables
+d 
+d  estout produces a table of regression results from one or
+d several models for use with spreadsheets, LaTeX, HTML, or a
+d word-processor table. eststo stores a quick copy of the active
+d estimation results for later tabulation. esttab is a wrapper for
+d estout. It displays a pretty looking publication-style regression
+d table without much typing. estadd adds additional results to the
+d e()-returns for one or several models previously fitted and
+d stored. This package subsumes the previously circulated esto,
+d esta, estadd,  and estadd_plus. An earlier version of estout is
+d available  as estout1.
+d 
+d KW: estimates
+d KW: LaTeX
+d KW: HTML
+d KW: word processor
+d KW: output
+d 
+d Requires: Stata version 8.2
+d 
+d Distribution-Date: 20260413
+d 
+d Author: Ben Jann, University of Bern
+d Support: email jann@@soz.unibe.ch
+d 
+f _\_eststo.ado
+f _\_eststo.hlp
+f e\estadd.ado
+f e\estadd.hlp
+f e\estout.ado
+f e\estout.hlp
+f e\eststo.ado
+f e\eststo.hlp
+f e\estpost.ado
+f e\estpost.hlp
+f e\esttab.ado
+f e\esttab.hlp
+e
+S http://fmwww.bc.edu/repec/bocode/e
+N erepost.pkg
+D 17 Jul 2026
+U 4
+d 'EREPOST': module to repost the estimation results
+d 
+d  erepost changes the b or V matrix of the current estimation
+d results or changes the declared estimation sample. erepost is
+d similar to official ereturn repost. However, erepost is allowed
+d after estimation commands that do not post their results using
+d -ereturn post- (e.g. logit) and erepost can be used outside of
+d eclass programs.
+d 
+d KW: estimation
+d KW: results
+d 
+d Requires: Stata version 8.2
+d 
+d Distribution-Date: 20250630
+d 
+d Author: Ben Jann, University of Bern
+d Support: email jann@@soz.unibe.ch
+d 
+f e\erepost.ado
+f e\erepost.hlp
+e
+S http://fmwww.bc.edu/repec/bocode/s
+N spmap.pkg
+D 17 Jul 2026
+U 5
+d 'SPMAP': module to visualize spatial data
+d 
+d   spmap is aimed at visualizing several kinds of spatial data,
+d and is particularly suited for drawing thematic maps and
+d displaying the results of spatial data analyses. Proper
+d specification of spmap options and suboptions, combined with the
+d availability of properly formatted spatial data, allows the user
+d to draw several kinds of maps, including choropleth maps,
+d proportional symbol maps, pin maps, pie chart maps, and
+d noncontiguous area cartograms. spmap completely supersedes its
+d predecessor tmap.
+d 
+d KW: maps
+d KW: thematic
+d KW: spatial data
+d KW: choropleth
+d 
+d Requires: Stata version 9.2
+d 
+d Distribution-Date: 20180118
+d 
+d Author: Maurizio Pisati, University of Milano Bicocca - Italy
+d Support: email maurizio.pisati@@unimib.it
+d 
+f s\spmap.ado
+f s\spmap.hlp
+f s\spmap_arrow.ado
+f s\spmap_color.ado
+f s\spmap_diagram.ado
+f s\spmap_examples.ado
+f s\spmap_label.ado
+f s\spmap_line.ado
+f s\spmap_point.ado
+f s\spmap_polygon.ado
+f s\spmap_psl.ado
+f s\spmap_scalebar.ado
+e
+S http://fmwww.bc.edu/repec/bocode/m
+N maptile.pkg
+D 17 Jul 2026
+U 6
+d 'MAPTILE': module to map a variable
+d 
+d  maptile makes it easy to map a variable in Stata.  It generates
+d choropleth maps, where each area is shaded according to the value
+d of the variable being plotted. By default, maptile divides the
+d geographic units into equal-sized bins (corresponding to
+d quantiles of the plotted variable), then colors the bins in
+d increasing intensity. To generate any particular map, maptile
+d uses a geography, which is a template for that map. These need to
+d be downloaded and installed. If no geography currently exists for
+d the region you want to map, you can create a new one.
+d 
+d KW: map
+d KW: geography
+d KW: spmap
+d KW: cloropleth map
+d 
+d Requires: Stata version 11 and spmap from SSC (q.v.)
+d 
+d Distribution-Date: 20170623
+d 
+d Author: Michael Stepner
+d Support: email michaelstepner@@gmail.com
+d 
+f m\maptile.ado
+f m\maptile_geohelp.ado
+f m\maptile_geolist.ado
+f m\maptile_install.ado
+f m\maptile.sthlp
+f m\maptile_newgeo.sthlp
+e
+S http://fmwww.bc.edu/repec/bocode/c
+N carryforward.pkg
+D 17 Jul 2026
+U 7
+d 'CARRYFORWARD': module to carry forward previous observations
+d 
+d  carryforward will carry values forward from one observation to
+d the next, filling in missing values with the previous value. This
+d is not intended for imputing missing values; it is regarded as a
+d bad choice for missing-value imputation. The intent is, rather,
+d to fill in "holes", where a value should  naturally prevail from
+d one observation to the next. The holes may be artifacts of data
+d management operations such as merging.
+d 
+d KW: carryforward
+d KW: carry
+d KW: forward
+d KW: missing
+d KW: fill
+d KW: replace
+d KW: cascade
+d 
+d Requires: Stata version 8.2
+d 
+d Distribution-Date: 20160212
+d 
+d Author: David Kantor
+d Support: email  kantor.d@@att.net
+d 
+f c\carryforward.ado
+f c\carryforward.hlp
+e
+S http://fmwww.bc.edu/repec/bocode/e
+N ereplace.pkg
+D 17 Jul 2026
+U 8
+d 'EREPLACE': module to extend egen and egenmore to permit replacing
+d 
+d    ereplace extends the popular egen and egenmore (if installed)
+d modules to permit replacing. ereplace replaces varname of the
+d optionally specified storage type [type] equal to
+d fcn(arguments).  Depending on fcn(), arguments refers to an
+d expression, a varlist, a numlist, or an empty    string. The
+d options are similarly function dependent.
+d 
+d KW: data management
+d KW: egen
+d KW: replace
+d 
+d Requires: Stata version 6
+d 
+d Distribution-Date: 20200511
+d 
+d Author: Nicholas J. Cox, Durham University
+d Support: email N.J.Cox@@durham.ac.uk
+d 
+d Author: Chris Larkin, The Behavioural Insights Team
+d Support: email chris.larkin@@bi.team
+d 
+f e\ereplace.ado
+f e\ereplace.sthlp
+e
+S http://fmwww.bc.edu/repec/bocode/c
+N coefplot.pkg
+D 17 Jul 2026
+U 9
+d 'COEFPLOT': module to plot regression coefficients and other results
+d 
+d   coefplot plots results from estimation commands or Stata
+d matrices. Results from multiple models or matrices can be
+d combined in a single graph. The default behavior of coefplot is
+d to draw markers for coefficients and horizontal spikes for
+d confidence intervals. However, coefplot can also produce various
+d other types of graphs.
+d 
+d KW: graphics
+d KW: coefficients
+d KW: estimation
+d 
+d Requires: Stata version 11
+d 
+d Distribution-Date: 20250822
+d 
+d Author: Ben Jann, University of Bern
+d Support: email jann@@soz.unibe.ch
+d 
+f c\coefplot.ado
+f c\coefplot.sthlp
+e
+S http://fmwww.bc.edu/repec/bocode/r
+N retrodesign.pkg
+D 17 Jul 2026
+U 10
+d 'RETRODESIGN': module to compute type-S (Sign) and type-M (Magnitude) errors
+d 
+d  retrodesign computes power, type-S, and type-M errors for one or
+d more specified effect sizes. A type-S (sign) error indicates the
+d probability of an effect size estimate being in the wrong
+d direction, and a type-M (magnitude) error indicates the factor by
+d which the magnitude of an effect might be overestimated -- given
+d that the test statistic is statistically significant (Gelman and
+d Carlin 2014).  Gelman and Carlin (2014) propose computing the
+d type-M error using the Student's t distribution while Lu, Qiu,
+d and Deng (2019) propose a closed form solution for computing the
+d type-M error.  Both methods are implemented in retrodesign.
+d retrodesign produces results identical to those computed in the
+d retrodesign package for R.
+d 
+d KW: power analysis
+d KW: statistical significance
+d KW: design calculation
+d KW: type S error
+d KW: type M error
+d KW: replication crisis
+d 
+d Requires: Stata version 11
+d 
+d Distribution-Date: 20191026
+d 
+d Author: Ariel Linden, Linden Consulting Group, LLC
+d Support: email alinden@@lindenconsulting.org
+d 
+f r\retrodesign.ado
+f r\retrodesign.sthlp
+e
+S https://raw.githubusercontent.com/sergiocorreia/stata-require/master/src
+N require.pkg
+D 17 Jul 2026
+U 11
+d REQUIRE: ensure that a package is installed; also ensure minimum version
+d 
+d Authors:
+d Sergio Correia. Board of Governors of the Federal Reserve System
+d Matthew P. Seay. Board of Governors of the Federal Reserve System
+d 
+d For more information, see https://github.com/sergiocorreia/stata-require
+d 
+d KW: reproductible-research
+d KW: which
+d KW: ssc
+d 
+d Requires: Stata version 14.0
+d 
+d Distribution-Date: 20240410
+d 
+f r\require.ado
+f r\require.sthlp
+e
+S http://fmwww.bc.edu/repec/bocode/b
+N bacondecomp.pkg
+D  7 Aug 2026
+U 12
+d 'BACONDECOMP': module to perform a Bacon decomposition of difference-in-differences estimation
+d 
+d  bacondecomp shows a Bacon decomposition of
+d difference-in-differences estimation with    variation in
+d treatment timing.  The two-way fixed effects   DD model is a
+d weighted average of all possible two-group/two period DD
+d estimators. The    command generates a scatterplot of 2x2
+d difference-in-difference estimates and their   associated
+d weights. The data must be xtset and the variable list must
+d include an outcome as    the first item, and a treatment that can
+d only turn from zero to one during the time period    examined as
+d its second item.
+d 
+d KW: Bacon decomposition
+d KW: DiD
+d KW: difference-in-differences
+d 
+d Requires: Stata version 10.2
+d 
+d Distribution-Date: 20220921
+d 
+d Author:    Andrew Goodman-Bacon
+d Support: email    andrew.j.goodman-bacon@@vanderbilt.edu
+d 
+d Author:    Thomas Goldring
+d Support: email    thomasgoldring@@gmail.com
+d 
+d Author: Austin Nichols
+d Support: email austinnichols@@gmail.com
+d 
+f b\bacon.sthlp
+f b\baconde.ado
+f b\bac.sthlp
+f b\bacondecomp.sthlp
+f b\ba.sthlp
+f b\b.sthlp
+f b\baconde.sthlp
+f b\bacondec.ado
+f b\bacond.sthlp
+f b\bacondecom.ado
+f b\bacondecomp.ado
+f b\bacondecom.sthlp
+f b\ba.ado
+f b\baco.ado
+f b\bacon.ado
+f b\baco.sthlp
+f b\bac.ado
+f b\b.ado
+f b\bacondeco.sthlp
+f b\bacondec.sthlp
+f b\bacondeco.ado
+e

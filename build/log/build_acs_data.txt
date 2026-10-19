@@ -1,0 +1,442 @@
+----------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\dev\Final\2004-2019/build/log/build_acs_data.txt
+  log type:  text
+ opened on:  21 Jul 2026, 23:49:51
+
+. 
+. 
+. /*------------------------------------------------------------------------------
+> build_acs_data.do
+> 
+> CREATED BY: Anne M. Burton
+> CREATED ON: 24 September 2019 by Anne M. Burton
+> UPDATED ON: 27 August 2025 by Anne M. Burton (final check for replication package)
+> 
+> SOURCES: ACS from IPUMS
+> 
+> DESCRIPTION: code for cleaning ACS data
+> -----------------------------------------------------------------------------*/
+. 
+. use "$build_data/usa_00008.dta", clear
+
+. 
+. *** Sample filters
+. * Filter on year: 2004+
+. qui keep if year >= 2004        
+
+. 
+. *** Analysis variables
+. * Citizenship
+. gen us_citizen = (citizen <= 2)
+
+. drop citizen
+
+. 
+. * Skills/education
+. qui gen no_hs = (educd <= 61)
+
+. qui gen hs_deg = (educd == 62 | educd == 63 | educd == 64)
+
+. qui gen no_coll_deg = (educd <= 71)
+
+. qui gen coll_deg = (educd == 81 | educd == 101 | educd == 114 | educd == 115 | educd == 116)
+
+. qui label var no_hs "No high school diploma or GED"
+
+. qui label var hs_deg "High school diploma or GED"
+
+. qui label var no_coll_deg "Less than a college degree"
+
+. qui label var coll_deg "At least an associate's degree"
+
+. 
+. * Doleac and Hansen (2020) sample
+. gen dh_sample = (us_citizen == 1 & educ <=8 & year >= 2004 & year <= 2014) // Note that educ <= 8 actually includes workers with associate degrees
+
+. 
+. * Employment
+. qui gen employed = (empstat == 1)
+
+. qui label var employed "Worked for pay last week (empstat == 1)"
+
+. 
+. * Public sector employment 
+. gen employed_public = (ind1990 >= 900 & ind1990 <= 932 & empstat == 1)
+
+.                 
+. * Enrolled in school
+. qui gen in_school = (school == 2)
+
+. qui label var in_school "Enrolled in school (school == 2)"
+
+. 
+. *rename some variables
+. rename statefip stateFIPS
+
+. rename countyfip fips_county_code
+
+. rename metarea msa_code
+
+. rename met2013 msa_2013
+
+.                 
+. gen metroFIPS = msa_2013 
+(1,194,354 missing values generated)
+
+. replace metroFIPS = stateFIPS if (msa_2013 == . | msa_2013 == 0)
+(13,451,245 real changes made)
+
+. 
+. ***** Clean data and refine sample 
+. rename msa_2013 cbsa_code
+
+. 
+. * Keep only men for now 
+. keep if (sex == 1)
+(24,392,255 observations deleted)
+
+. 
+. * Stop sample in 2019
+. drop if (year > 2019)
+(0 observations deleted)
+
+. 
+. * Code region and divisions for FEs
+. gen gereg = 1 if (region == 11 | region == 12)
+(19,063,051 missing values generated)
+
+. replace gereg = 2 if (region == 21 | region == 22)
+(5,128,488 real changes made)
+
+. replace gereg = 3 if (region == 31 | region == 32 | region == 33)
+(8,511,941 real changes made)
+
+. replace gereg = 4 if (region == 41 | region == 42)
+(5,422,622 real changes made)
+
+. label define lab_gereg 1 "Northeast" 2 "Midwest" 3 "South" 4 "West"
+
+. label values gereg lab_gereg
+
+. label var gereg "Census Regions"
+
+. qui tab gereg, gen(reg)
+
+. label var reg1 "Northeast"
+
+. label var reg2 "Midwest"
+
+. label var reg3 "South"
+
+. label var reg4 "West"
+
+. 
+. rename region division
+
+. label var division "Census division"
+
+. 
+. ********************************************************************************
+. * Merge on BTB policy assignment from Doleac and Hansen (2020)
+. merge m:1 year metroFIPS stateFIPS using "$analysis_data/dh_btb_policy_assignment.dta"
+(variable metroFIPS was float, now double to accommodate using data's values)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                     7,805,113
+        from master                 7,805,113  (_merge==1)
+        from using                          0  (_merge==2)
+
+    Matched                        15,370,922  (_merge==3)
+    -----------------------------------------
+
+. drop _merge
+
+. 
+. gen dh_hisp = (hispan >= 1 & hispan <= 4)
+
+. gen dh_blackNH = (racblk == 2 & dh_hisp == 0)
+
+. gen dh_whiteNH = (racwht == 2 & dh_hisp == 0)
+
+. 
+. gen dh_group = . 
+(23,176,035 missing values generated)
+
+. replace dh_group = 1 if (dh_whiteNH == 1)
+(16,374,125 real changes made)
+
+. replace dh_group = 2 if (dh_blackNH == 1)
+(2,385,209 real changes made)
+
+. replace dh_group = 3 if (dh_hisp == 1)
+(3,200,898 real changes made)
+
+. label define lab_dh_group 1 "White, non-Hispanic" 2 "Black, non-Hispanic" 3 "Hispanic"
+
+. label values dh_group lab_dh_group
+
+. 
+. keep if (dh_group != .)
+(1,347,311 observations deleted)
+
+. 
+. * BTB X race dummies
+. gen dhBTBxBlackNH = dhBTB*dh_blackNH
+(7,302,015 missing values generated)
+
+. gen dhBTBxWhiteNH = dhBTB*dh_whiteNH
+(7,302,015 missing values generated)
+
+. gen dhBTBxHisp = dhBTB*dh_hisp
+(7,302,015 missing values generated)
+
+. 
+. ********************************************************************************
+. * Merge on corrected BTB policy assignment
+. merge m:1 metroFIPS stateFIPS year using "$analysis_data/btb_annual_laws.dta"
+(variable year was int, now float to accommodate using data's values)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                     6,409,986
+        from master                 6,407,213  (_merge==1)
+        from using                      2,773  (_merge==2)
+
+    Matched                        15,421,511  (_merge==3)
+    -----------------------------------------
+
+. keep if (_merge == 1 | _merge == 3)
+(2,773 observations deleted)
+
+. drop _merge 
+
+. 
+. * Add in treatment dates for non-MSAs covered by state laws
+. replace BTB = 0 if (metroFIPS == stateFIPS)
+(6,407,213 real changes made)
+
+. replace BTB = 1 if (metroFIPS == 04 & year >= 2018) // Arizona
+(4,109 real changes made)
+
+. replace BTB = 1 if (metroFIPS == 06 & year >= 2011) // California
+(40,087 real changes made)
+
+. replace BTB = 1 if (metroFIPS == 08 & year >= 2013) // Colorado
+(49,788 real changes made)
+
+. replace BTB = 1 if (metroFIPS == 09 & year >= 2011) // Connecticut
+(9,525 real changes made)
+
+. replace BTB = 1 if (metroFIPS == 10 & year >= 2015) // Delaware
+(0 real changes made)
+
+. replace BTB = 1 if (metroFIPS == 13 & year >= 2016) // Georgia
+(80,277 real changes made)
+
+. replace BTB = 1 if (metroFIPS == 15 & year >= 1999) // Hawaii
+(19,769 real changes made)
+
+. replace BTB = 1 if (metroFIPS == 17 & year >= 2014) // Illinois
+(102,990 real changes made)
+
+. replace BTB = 1 if (metroFIPS == 18 & year >= 2018) // Indiana
+(30,592 real changes made)
+
+. replace BTB = 1 if (metroFIPS == 20 & year >= 2019) // Kansas
+(6,894 real changes made)
+
+. replace BTB = 1 if (metroFIPS == 21 & year >= 2018) // Kentucky
+(26,914 real changes made)
+
+. replace BTB = 1 if (metroFIPS == 22 & year >= 2017) // Louisiana
+(19,189 real changes made)
+
+. replace BTB = 1 if (metroFIPS == 24 & year >= 2014) // Maryland
+(20,379 real changes made)
+
+. replace BTB = 1 if (metroFIPS == 25 & year >= 2011) // Massachusetts
+(9,757 real changes made)
+
+. replace BTB = 1 if (metroFIPS == 26 & year >= 2019) // Michigan
+(19,526 real changes made)
+
+. replace BTB = 1 if (metroFIPS == 27 & year >= 2009) // Minnesota
+(169,380 real changes made)
+
+. replace BTB = 1 if (metroFIPS == 29 & year >= 2017) // Missouri
+(30,214 real changes made)
+
+. replace BTB = 1 if (metroFIPS == 31 & year >= 2015) // Nebraska
+(24,638 real changes made)
+
+. replace BTB = 1 if (metroFIPS == 32 & year >= 2018) // Nevada
+(3,243 real changes made)
+
+. replace BTB = 1 if (metroFIPS == 34 & year >= 2016) // New Jersey
+(2,346 real changes made)
+
+. replace BTB = 1 if (metroFIPS == 35 & year >= 2011) // New Mexico
+(27,492 real changes made)
+
+. replace BTB = 1 if (metroFIPS == 36 & year >= 2016) // New York
+(56,559 real changes made)
+
+. replace BTB = 1 if (metroFIPS == 39 & year >= 2016) // Ohio
+(62,350 real changes made)
+
+. replace BTB = 1 if (metroFIPS == 40 & year >= 2017) // Oklahoma
+(35,409 real changes made)
+
+. replace BTB = 1 if (metroFIPS == 41 & year >= 2016) // Oregon
+(29,188 real changes made)
+
+. replace BTB = 1 if (metroFIPS == 42 & year >= 2018) // Pennsylvania
+(35,753 real changes made)
+
+. replace BTB = 1 if (metroFIPS == 44 & year >= 2014) // Rhode Island
+(0 real changes made)
+
+. replace BTB = 1 if (metroFIPS == 47 & year >= 2017) // Tennessee
+(32,206 real changes made)
+
+. replace BTB = 1 if (metroFIPS == 49 & year >= 2018) // Utah
+(6,156 real changes made)
+
+. replace BTB = 1 if (metroFIPS == 50 & year >= 2016) // Vermont
+(9,383 real changes made)
+
+. replace BTB = 1 if (metroFIPS == 51 & year >= 2016) // Virginia
+(31,944 real changes made)
+
+. replace BTB = 1 if (metroFIPS == 53 & year >= 2019) // Washington
+(7,889 real changes made)
+
+. replace BTB = 1 if (metroFIPS == 55 & year >= 2017) // Wisconsin
+(56,287 real changes made)
+
+. 
+. 
+. bys metroFIPS: egen BTBever = max(BTB)
+
+. replace BTBever = 1 if (BTBever > 0) 
+(0 real changes made)
+
+. 
+. * Corrected treatment variable
+. gen BTBxBlackNH = BTB*dh_blackNH
+
+. gen BTBxWhiteNH = BTB*dh_whiteNH
+
+. gen BTBxHisp = BTB*dh_hisp
+
+. 
+. ren btb_eff btb_eff_year
+
+. 
+. ********************************************************************************
+. * Note: this actually includes people with an associate's degree and also those with some college credit but no degree
+. gen dh_noCollege = (educd <= 81)
+
+. 
+. * Time variable
+. gen dh_time = 0
+
+. replace dh_time = 12 if year == 2005
+(1,318,886 real changes made)
+
+. replace dh_time = 24 if year == 2006
+(1,370,932 real changes made)
+
+. replace dh_time = 36 if year == 2007
+(1,379,737 real changes made)
+
+. replace dh_time = 48 if year == 2008
+(1,380,331 real changes made)
+
+. replace dh_time = 60 if year == 2009
+(1,392,833 real changes made)
+
+. replace dh_time = 72 if year == 2010
+(1,406,082 real changes made)
+
+. replace dh_time = 84 if year == 2011
+(1,431,821 real changes made)
+
+. replace dh_time = 96 if year == 2012
+(1,427,723 real changes made)
+
+. replace dh_time = 108 if year == 2013
+(1,436,655 real changes made)
+
+. replace dh_time = 120 if year == 2014
+(1,435,376 real changes made)
+
+. replace dh_time = 132 if year == 2015
+(1,441,785 real changes made)
+
+. replace dh_time = 144 if year == 2016
+(1,445,684 real changes made)
+
+. replace dh_time = 156 if year == 2017
+(1,458,499 real changes made)
+
+. replace dh_time = 168 if year == 2018
+(1,472,069 real changes made)
+
+. replace dh_time = 180 if year == 2019
+(1,483,978 real changes made)
+
+. 
+. 
+. ***** Save the dataset
+. compress
+  variable year was float now int
+  variable pernum was int now byte
+  variable age was int now byte
+  variable us_citizen was float now byte
+  variable no_hs was float now byte
+  variable hs_deg was float now byte
+  variable no_coll_deg was float now byte
+  variable coll_deg was float now byte
+  variable dh_sample was float now byte
+  variable employed was float now byte
+  variable employed_public was float now byte
+  variable in_school was float now byte
+  variable gereg was float now byte
+  variable dhBTBever was float now byte
+  variable dhBTB was float now byte
+  variable dh_hisp was float now byte
+  variable dh_blackNH was float now byte
+  variable dh_whiteNH was float now byte
+  variable dh_group was float now byte
+  variable dhBTBxBlackNH was float now byte
+  variable dhBTBxWhiteNH was float now byte
+  variable dhBTBxHisp was float now byte
+  variable btb_state was float now byte
+  variable btb_eff_year was float now int
+  variable BTB was float now byte
+  variable BTBever was float now byte
+  variable BTBxBlackNH was float now byte
+  variable BTBxWhiteNH was float now byte
+  variable BTBxHisp was float now byte
+  variable dh_noCollege was float now byte
+  variable dh_time was float now int
+  variable serial was double now long
+  variable hhwt was double now int
+  variable strata was double now long
+  variable perwt was double now int
+  variable metroFIPS was double now long
+  (2,401,159,640 bytes saved)
+
+. save "$analysis_data/btb_acs_analysis_table.dta", replace 
+file C:\dev\Final\2004-2019/build/analysis_data/btb_acs_analysis_table.dta saved
+
+. 
+. log close
+      name:  <unnamed>
+       log:  C:\dev\Final\2004-2019/build/log/build_acs_data.txt
+  log type:  text
+ closed on:  21 Jul 2026, 23:55:30
+----------------------------------------------------------------------------------------------------------------------------------------------------

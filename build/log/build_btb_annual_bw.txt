@@ -1,0 +1,1996 @@
+----------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\dev\Final\2004-2019/build/log/build_btb_annual_bw.txt
+  log type:  text
+ opened on:  21 Jul 2026, 23:49:49
+
+. 
+. 
+. * get msa codes from omb delineation file, feb. 2013: https://www.census.gov/geographies/reference-files/time-series/demo/metro-micro/delineation-
+> files.html
+. import excel "$build_data/msa_delineation_file_feb2013.xls", sheet("List 1") cellrange(A3:L1885) firstrow clear
+(12 vars, 1,882 obs)
+
+. 
+. * only keep metropolitan statistical areas (as opposed to including micropolitan statistical areas)
+. keep if MetropolitanMicropolitanStatis == "Metropolitan Statistical Area"
+(646 observations deleted)
+
+. 
+. * rename the variables I want to keep
+. ren CBSACode metroFIPS
+
+. ren CBSATitle msa_name
+
+. ren CountyCountyEquivalent county_name
+
+. ren StateName state_name
+
+. ren FIPSStateCode stateFIPS
+
+. ren FIPSCountyCode fips_county_code
+
+. 
+. keep metroFIPS msa_name county_name state_name stateFIPS fips_county_code
+
+. 
+. * destring my fips code variables
+. destring metroFIPS, replace
+metroFIPS: all characters numeric; replaced as long
+
+. destring stateFIPS, replace
+stateFIPS: all characters numeric; replaced as byte
+
+. destring fips_county_code, replace
+fips_county_code: all characters numeric; replaced as int
+
+. 
+. save "$build_data/msa_2013.dta", replace
+file C:\dev\Final\2004-2019/build/build_data/msa_2013.dta saved
+
+. 
+. *import principal city info, from feb. 2013: https://www.census.gov/geographies/reference-files/time-series/demo/metro-micro/delineation-files.htm
+> l
+. import excel "$build_data/msa_principal_cities_feb2013.xls", sheet("List 2") cellrange(A3:F1252) firstrow clear
+(6 vars, 1,249 obs)
+
+. 
+. *only keep metropolitan statistical areas (as opposed to including micropolitan statistical areas)
+. keep if MetropolitanMicropolitanStatis == "Metropolitan Statistical Area"
+(564 observations deleted)
+
+. 
+. ren CBSACode metroFIPS
+
+. ren CBSATitle msa_name
+
+. ren PrincipalCityName principal_city
+
+. ren FIPSStateCode stateFIPS
+
+. ren FIPSPlaceCode fips_place_code
+
+. 
+. keep metroFIPS msa_name principal_city stateFIPS fips_place_code
+
+. 
+. destring metroFIPS, replace
+metroFIPS: all characters numeric; replaced as long
+
+. destring stateFIPS, replace
+stateFIPS: all characters numeric; replaced as byte
+
+. destring fips_place_code, replace
+fips_place_code: all characters numeric; replaced as long
+
+. 
+. 
+. /*rename some principal cities that have names that won't match with central city file
+> 
+> Current name in principal city                                                                          metroFIPS               stateFIPS         
+>       fips_place_code
+> ------------------------------------------------------------------------------------------------------------------------
+> Athens-Clarke County unified government (balance)                                       12020                   13                                
+>       03440
+> Augusta-Richmond County consolidated government (balance)                       12260                   13                                      04
+> 204
+> Indianapolis city (balance)                                                                                     26900                   18        
+>                               36003
+> Louisville/Jefferson County metro government (balance)                          31140                   21                                      48
+> 006
+> Nashville-Davidson metropolitan government (balance)                            34980                   47                                      52
+> 006
+> San Buenaventura (Ventura)                                                                                      37100                   6         
+>                               65042
+> El Paso de Robles (Paso Robles)                                                                         42020                   6                 
+>                       22300
+> */
+. 
+. *need to duplicate the observations for athens-clarke county and augusta-richmond county b/c they list each of those as a central city (so you nee
+> d 2 principal cities for each msa)
+. expand 2 if metroFIPS == 12020 & stateFIPS == 13 & fips_place_code == 3440
+(1 observation created)
+
+. expand 2 if metroFIPS == 12260 & stateFIPS == 13 & fips_place_code == 4204
+(1 observation created)
+
+. bysort metroFIPS stateFIPS fips_place_code: gen temp = _n
+
+. tab temp
+
+       temp |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |        685       99.71       99.71
+          2 |          2        0.29      100.00
+------------+-----------------------------------
+      Total |        687      100.00
+
+. replace fips_place_code = . if temp == 2
+(2 real changes made, 2 to missing)
+
+. drop temp
+
+. 
+. replace principal_city = "Athens" if metroFIPS == 12020 & stateFIPS == 13 & fips_place_code == 3440
+(1 real change made)
+
+. replace principal_city = "Clarke County" if metroFIPS == 12020 & stateFIPS == 13 & fips_place_code == .
+(1 real change made)
+
+. replace principal_city = "Augusta" if metroFIPS == 12260 & stateFIPS == 13 & fips_place_code == 4204
+(1 real change made)
+
+. replace principal_city = "Richmond County" if metroFIPS == 12260 & stateFIPS == 13 & fips_place_code == .
+(1 real change made)
+
+. replace principal_city = "Indianapolis" if metroFIPS == 26900 & stateFIPS == 18 & fips_place_code == 36003
+(1 real change made)
+
+. replace principal_city = "Louisville/Jefferson County" if metroFIPS == 31140 & stateFIPS == 21 & fips_place_code == 48006
+(1 real change made)
+
+. replace principal_city = "Nashville/Davidson County" if metroFIPS == 34980 & stateFIPS == 47 & fips_place_code == 52006
+(1 real change made)
+
+. replace principal_city = "Ventura" if metroFIPS == 37100 & stateFIPS == 6 & fips_place_code == 65042
+(1 real change made)
+
+. replace principal_city = "Paso Robles" if metroFIPS == 42020 & stateFIPS == 6 & fips_place_code == 22300
+(1 real change made)
+
+. 
+. 
+. sort metroFIPS principal_city
+
+. by metroFIPS: gen number = _n
+
+. 
+. * reshape to merge with the other datasets
+. reshape wide principal_city stateFIPS fips_place_code, i(metroFIPS msa_name) j(number)
+(j = 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19)
+
+Data                               Long   ->   Wide
+-----------------------------------------------------------------------------
+Number of observations              687   ->   388         
+Number of variables                   6   ->   59          
+j variable (19 values)           number   ->   (dropped)
+xij variables:
+                         principal_city   ->   principal_city1 principal_city2 ... principal_city19
+                              stateFIPS   ->   stateFIPS1 stateFIPS2 ... stateFIPS19
+                        fips_place_code   ->   fips_place_code1 fips_place_code2 ... fips_place_code19
+-----------------------------------------------------------------------------
+
+. 
+. save "$build_data/msa_principal_cities_2013_acs.dta", replace
+file C:\dev\Final\2004-2019/build/build_data/msa_principal_cities_2013_acs.dta saved
+
+. 
+. * import central city info, from feb. 2013
+. import excel "$build_data/msa2013_names.xlsx", sheet("Sheet1") cellrange(A1:E295) firstrow clear
+(5 vars, 294 obs)
+
+. 
+. ren Code metroFIPS
+
+. ren Label msa_label
+
+. forvalues i = 1(1)3 {
+  2.         ren CentralCity`i' central_city_`i'
+  3. }
+
+. 
+. save "$build_data/msa_central_cities_2013.dta", replace
+file C:\dev\Final\2004-2019/build/build_data/msa_central_cities_2013.dta saved
+
+. 
+. * merge msa file with principal city info
+. use "$build_data/msa_2013.dta", clear
+
+. merge m:1 metroFIPS msa_name using "$build_data/msa_principal_cities_2013_acs.dta"
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                             1,236  (_merge==3)
+    -----------------------------------------
+
+. 
+. drop _merge
+
+. 
+. * merge msa file with central city info
+. merge m:1 metroFIPS using "$build_data/msa_central_cities_2013.dta"
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                           224
+        from master                       224  (_merge==1)
+        from using                          0  (_merge==2)
+
+    Matched                             1,012  (_merge==3)
+    -----------------------------------------
+
+. 
+. * fix some unmerged from master
+. * there are no unmerged MSAs with more than 3 principal cities, so, make the central cities be the first 3 principal cities
+. replace central_city_1 = principal_city1 if _merge == 1
+(224 real changes made)
+
+. replace central_city_2 = principal_city2 if _merge == 1
+(45 real changes made)
+
+. replace central_city_3 = principal_city3 if _merge == 1
+(4 real changes made)
+
+. 
+. * verified by checking that the MSA name matches the central cities from this method ^^
+. 
+. gen flag = 1
+
+. replace flag = 0 if msa_name == msa_label
+(1,012 real changes made)
+
+. tab flag _merge
+
+           | Matching result from
+           |         merge
+      flag | Master on  Matched ( |     Total
+-----------+----------------------+----------
+         0 |         0      1,012 |     1,012 
+         1 |       224          0 |       224 
+-----------+----------------------+----------
+     Total |       224      1,012 |     1,236 
+
+. drop _merge
+
+. 
+. ren stateFIPS v1_stateFIPS
+
+. 
+. * reshape again to get correct btb law based on central city
+. reshape long principal_city stateFIPS fips_place_code, i(metroFIPS msa_name v1_stateFIPS fips_county_code) j(number)
+(j = 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19)
+
+Data                               Wide   ->   Long
+-----------------------------------------------------------------------------
+Number of observations            1,236   ->   23,484      
+Number of variables                  68   ->   15          
+j variable (19 values)                    ->   number
+xij variables:
+principal_city1 principal_city2 ... principal_city19->principal_city
+  stateFIPS1 stateFIPS2 ... stateFIPS19   ->   stateFIPS
+fips_place_code1 fips_place_code2 ... fips_place_code19->fips_place_code
+-----------------------------------------------------------------------------
+
+. 
+. ren stateFIPS pc_stateFIPS
+
+. ren v1_stateFIPS stateFIPS
+
+. label variable pc_stateFIPS "principal city's state fips"
+
+. label variable fips_place_code "principal city's place fips"
+
+. label variable stateFIPS "MSA-state-county's state fips"
+
+. label variable fips_county_code "MSA-state-county's county fips"
+
+. 
+. drop if principal_city == ""
+(20,432 observations deleted)
+
+. 
+. drop if pc_stateFIPS != stateFIPS & number > 1
+(361 observations deleted)
+
+. bysort metroFIPS stateFIPS: egen number2 = max(number)
+
+. drop if pc_stateFIPS != stateFIPS & number == 1 & number2 > 1
+(60 observations deleted)
+
+. 
+. drop number number2
+
+. 
+. save "$build_data/msa_w_cities_acs.dta", replace
+file C:\dev\Final\2004-2019/build/build_data/msa_w_cities_acs.dta saved
+
+. 
+. 
+. 
+. 
+. * now make our BTB variables
+. 
+. *expand the dataset to make it a time series
+. expand 16
+(39,465 observations created)
+
+. bysort metroFIPS stateFIPS fips_county_code principal_city: gen number = _n
+
+. gen year = 2003 + number
+
+. drop number
+
+. 
+. *** adapted version of BTB_treatment to work for ACS ***
+. * BTB effective on January 15 of that year (corresponds to our CPS treatment definition of 15th of the month, approximating the CPS reference week
+> )
+. 
+. *make btb effective date variables
+. gen btb_eff_city = .
+(42,096 missing values generated)
+
+. gen btb_eff_city_eos = . // for the map of MSAs/states with BTB by end of sample period, leftover from original study, doesn't do anything now
+(42,096 missing values generated)
+
+. gen btb_eff_city_con = .
+(42,096 missing values generated)
+
+. gen btb_eff_city_pri = .
+(42,096 missing values generated)
+
+. 
+. gen county_special = .
+(42,096 missing values generated)
+
+. 
+. //Alabama
+. * Birmingham February 4, 2016 (public, executive order)
+. replace btb_eff_city = 2017 if metroFIPS == 13820 & stateFIPS == 1 & fips_place_code == 07000
+(112 real changes made)
+
+. 
+. 
+. //Arizona
+. * Tucson March 17, 2015 (public resolution; supersedes Aug. 27, 2014 informal
+. * commitment to remove the conviction question, which is not itself a formal action)
+. replace btb_eff_city = 2016 if metroFIPS == 46060 & stateFIPS == 4 & fips_place_code == 77000
+(16 real changes made)
+
+. * Pima County November 10, 2015 (public, covers Tucson area)
+. replace btb_eff_city = 2016 if metroFIPS == 46060 & stateFIPS == 4 & fips_county_code == 19 & fips_place_code != 77000
+(0 real changes made)
+
+. replace county_special = 1 if stateFIPS == 4 & fips_county_code == 19
+(16 real changes made)
+
+. * Glendale September 2015 (public, exact day unknown): needs to be made further down bc it's not a principal city
+. * Phoenix April 18, 2016 (public)
+. replace btb_eff_city = 2017 if metroFIPS == 38060 & stateFIPS == 4 & fips_place_code == 55000
+(32 real changes made)
+
+. * Tempe August 29, 2016 / effective Sept. 22, 2016 (public)
+. replace btb_eff_city = 2017 if metroFIPS == 38060 & stateFIPS == 4 & fips_place_code == 73000
+(32 real changes made)
+
+. * Maricopa County December 13, 2017 (public - excludes Phoenix and Tempe city proper)
+. replace btb_eff_city = 2018 if metroFIPS == 38060 & stateFIPS == 4 & fips_county_code == 13 & fips_place_code != 55000 & fips_place_code != 73000
+(32 real changes made)
+
+. replace county_special = 1 if stateFIPS == 4 & fips_county_code == 13
+(64 real changes made)
+
+. 
+. 
+. //Arkansas
+. * Pulaski County June 28, 2016 (public, covers Little Rock)
+. replace btb_eff_city = 2017 if metroFIPS == 30780 & stateFIPS == 5 & fips_county_code == 119
+(48 real changes made)
+
+. replace county_special = 1 if stateFIPS == 5 & fips_county_code == 119
+(48 real changes made)
+
+. 
+. 
+. //California
+. * Compton July 1, 2011 (public): needs to be made further down bc it's not a principal city
+. * Carson City March 6, 2012 (public)
+. replace btb_eff_city = 2013 if metroFIPS == 31080 & stateFIPS == 6 & fips_place_code == 11530
+(32 real changes made)
+
+. * Pasadena July 1, 2013 (public)
+. replace btb_eff_city = 2014 if metroFIPS == 31080 & stateFIPS == 6 & fips_place_code == 56000
+(32 real changes made)
+
+. * Los Angeles January 22, 2017 (all)
+. replace btb_eff_city = 2018 if metroFIPS == 31080 & stateFIPS == 6 & fips_place_code == 44000
+(32 real changes made)
+
+. replace btb_eff_city_con = 2018 if metroFIPS == 31080 & stateFIPS == 6 & fips_place_code == 44000
+(32 real changes made)
+
+. replace btb_eff_city_pri = 2018 if metroFIPS == 31080 & stateFIPS == 6 & fips_place_code == 44000
+(32 real changes made)
+
+. * Santa Clara May 1, 2012 (public)
+. replace btb_eff_city = 2013 if metroFIPS == 41940 & stateFIPS == 6 & fips_place_code == 69084
+(32 real changes made)
+
+. * Sacramento January 1, 2017 (contractor)
+. replace btb_eff_city_con = 2017 if metroFIPS == 40900 & stateFIPS == 6 & fips_place_code == 64000
+(64 real changes made)
+
+. * San Francisco October 11, 2005 (public)
+. replace btb_eff_city = 2006 if metroFIPS == 41860 & stateFIPS == 6 & fips_place_code == 67000
+(80 real changes made)
+
+. * Oakland January 1, 2007 (public)
+. replace btb_eff_city = 2007 if metroFIPS == 41860 & stateFIPS == 6 & fips_place_code == 53000
+(80 real changes made)
+
+. * Alameda County March 1, 2007 (public covered by Oakland and covers Berkeley)
+. replace btb_eff_city = 2008 if metroFIPS == 41860 & stateFIPS == 6 & fips_county_code == 1 & fips_place_code != 53000
+(160 real changes made)
+
+. replace county_special = 1 if stateFIPS == 6 & fips_county_code == 1
+(176 real changes made)
+
+. * Berkeley October 1, 2008 (public covered by Alameda County)
+. *replace btb_eff_city = 2009 if metroFIPS == 41860 & stateFIPS == 6 & fips_place_code == 6000
+. * San Francisco April 4, 2014 (contract)
+. replace btb_eff_city_con = 2015 if metroFIPS == 41860 & stateFIPS == 6 & fips_place_code == 67000
+(80 real changes made)
+
+. * San Francisco April 4, 2014 (private)
+. replace btb_eff_city_pri = 2015 if metroFIPS == 41860 & stateFIPS == 6 & fips_place_code == 67000
+(80 real changes made)
+
+. * Richmond November 22, 2011 (public): needs to be made further down bc it's not a principal city
+. * Richmond July 30, 2013 (contract): needs to be made further down bc it's not a principal city
+. 
+. 
+. 
+. //Connecticut
+. * Bridgeport October 5, 2009 (public)
+. replace btb_eff_city = 2010 if metroFIPS == 14860 & stateFIPS == 9 & fips_place_code == 08000
+(16 real changes made)
+
+. * Hartford, CT August 9, 2009 (public)
+. replace btb_eff_city = 2010 if metroFIPS == 25540 & stateFIPS == 9 & fips_place_code == 37000
+(48 real changes made)
+
+. * Hartford, CT August 9, 2009 (contract)
+. replace btb_eff_city_con = 2010 if metroFIPS == 25540 & stateFIPS == 9 & fips_place_code == 37000
+(48 real changes made)
+
+. * New Haven, CT enacted February 17, 2009. effective date unknown, so we assume it becomes effective one month later, which would make treatment s
+> tart in April (public)
+. replace btb_eff_city = 2010 if metroFIPS == 35300 & stateFIPS == 9 & fips_place_code == 52000
+(16 real changes made)
+
+. * New Haven, CT enacted February 17, 2009. effective date unknown, so we assume it becomes effective one month later, which would make treatment s
+> tart in April (contract)
+. replace btb_eff_city_con = 2010 if metroFIPS == 35300 & stateFIPS == 9 & fips_place_code == 52000
+(16 real changes made)
+
+. * Norwich December 1, 2008 (public)
+. replace btb_eff_city = 2009 if metroFIPS == 35980 & stateFIPS == 9 & fips_place_code == 56200
+(16 real changes made)
+
+. 
+. 
+. //Delaware 
+. * Wilmington December 10, 2012 (public covers New Castle County January 2014)
+. replace btb_eff_city = 2013 if metroFIPS == 37980 & stateFIPS == 10 & fips_place_code == 77580
+(16 real changes made)
+
+. * New Castle County January 28, 2014 (public covered by Wilmington): not effective during ACS sample but needed for map
+. replace btb_eff_city_eos = 2014 if metroFIPS == 37980 & stateFIPS == 10 & fips_county_code == 3 & fips_place_code != 77580
+(0 real changes made)
+
+. *replace county_special = 1 if stateFIPS == 10 & fips_county_code == 3
+. 
+. 
+. //District of Columbia
+. * Washington DC January 1, 2011 (public)
+. replace btb_eff_city = 2011 if metroFIPS == 47900 & stateFIPS == 11 & fips_place_code == 50000
+(16 real changes made)
+
+. * Washington, DC December 17, 2014 (contract):
+. replace btb_eff_city_con = 2015 if metroFIPS == 47900 & stateFIPS == 11 & fips_place_code == 50000
+(16 real changes made)
+
+. * Washington, DC December 17, 2014 (private):
+. replace btb_eff_city_pri = 2015 if metroFIPS == 47900 & stateFIPS == 11 & fips_place_code == 50000
+(16 real changes made)
+
+. 
+. 
+. //Florida 
+. * Jacksonville November 10, 2008 (public & contract)
+. replace btb_eff_city     = 2009 if metroFIPS == 27260 & stateFIPS == 12 & fips_place_code == 35000
+(80 real changes made)
+
+. replace btb_eff_city_con = 2009 if metroFIPS == 27260 & stateFIPS == 12 & fips_place_code == 35000
+(80 real changes made)
+
+. * Tampa January 14, 2013 (public)
+. replace btb_eff_city = 2013 if metroFIPS == 45300 & stateFIPS == 12 & fips_place_code == 71000
+(64 real changes made)
+
+. * Clearwater January 1, 2013 (public)
+. replace btb_eff_city = 2013 if metroFIPS == 45300 & stateFIPS == 12 & fips_place_code == 12875
+(64 real changes made)
+
+. * St. Petersburg January 1, 2015 (public)
+. replace btb_eff_city = 2015 if metroFIPS == 45300 & stateFIPS == 12 & fips_place_code == 63000
+(64 real changes made)
+
+. * Tallahassee January 28, 2015 (public)
+. replace btb_eff_city = 2016 if metroFIPS == 45220 & stateFIPS == 12 & fips_place_code == 70600
+(64 real changes made)
+
+. * Orlando May 15, 2015 (public)
+. replace btb_eff_city = 2016 if metroFIPS == 36740 & stateFIPS == 12 & fips_place_code == 53000
+(64 real changes made)
+
+. * Daytona Beach July 1, 2015 (public)
+. replace btb_eff_city = 2016 if metroFIPS == 19660 & stateFIPS == 12 & fips_place_code == 16525
+(32 real changes made)
+
+. * Gainesville November 19, 2015 (public)
+. replace btb_eff_city = 2016 if metroFIPS == 23540 & stateFIPS == 12 & fips_place_code == 25175
+(32 real changes made)
+
+. * Fort Myers December 7, 2015 (public)
+. replace btb_eff_city = 2016 if metroFIPS == 15980 & stateFIPS == 12 & fips_place_code == 24125
+(16 real changes made)
+
+. * Pompano Beach December 1, 2014 (public)
+. replace btb_eff_city = 2015 if metroFIPS == 33100 & stateFIPS == 12 & fips_place_code == 58050
+(48 real changes made)
+
+. * Miami-Dade County October 6, 2015 (public)
+. replace btb_eff_city = 2016 if metroFIPS == 33100 & stateFIPS == 12 & fips_county_code == 86
+(160 real changes made)
+
+. replace county_special = 1 if stateFIPS == 12 & fips_county_code == 86
+(160 real changes made)
+
+. * Broward County June 16, 2016 (public, overrides with Pompano Beach city law above)
+. replace btb_eff_city = 2017 if metroFIPS == 33100 & stateFIPS == 12 & fips_county_code == 11 & fips_place_code != 58050
+(144 real changes made)
+
+. replace county_special = 1 if stateFIPS == 12 & fips_county_code == 11
+(160 real changes made)
+
+. * Sarasota May 1, 2016 (public)
+. replace btb_eff_city = 2017 if metroFIPS == 35840 & stateFIPS == 12 & fips_place_code == 64175
+(32 real changes made)
+
+. 
+. 
+. //Georgia 
+. * Atlanta January 1, 2013 (public) -> Effective 2013
+. replace btb_eff_city = 2013 if metroFIPS == 12060 & stateFIPS == 13 & fips_place_code == 4000
+(464 real changes made)
+
+. * Fulton County July 16, 2014 (public - excludes Atlanta city proper)
+. replace btb_eff_city = 2015 if metroFIPS == 12060 & stateFIPS == 13 & fips_county_code == 121 & fips_place_code != 4000
+(64 real changes made)
+
+. replace county_special = 1 if stateFIPS == 13 & fips_county_code == 121
+(80 real changes made)
+
+. * Cherokee County March 1, 2016 (public)
+. replace btb_eff_city = 2017 if metroFIPS == 12060 & stateFIPS == 13 & fips_county_code == 57
+(80 real changes made)
+
+. replace county_special = 1 if stateFIPS == 13 & fips_county_code == 57
+(80 real changes made)
+
+. * Macon-Bibb County February 17, 2015 (public)
+. replace btb_eff_city = 2016 if metroFIPS == 31420 & stateFIPS == 13 & fips_place_code == 49000
+(80 real changes made)
+
+. * Albany March 24, 2015 (public)
+. replace btb_eff_city = 2016 if metroFIPS == 10500 & stateFIPS == 13 & fips_place_code == 1052
+(80 real changes made)
+
+. * Savannah May 14, 2015 (public)
+. replace btb_eff_city = 2016 if metroFIPS == 42340 & stateFIPS == 13 & fips_place_code == 69000
+(48 real changes made)
+
+. * Columbus May 29, 2015 (public)
+. replace btb_eff_city = 2016 if metroFIPS == 17980 & stateFIPS == 13 & fips_place_code == 19000
+(64 real changes made)
+
+. * Augusta January 17, 2017 (public)
+. replace btb_eff_city = 2018 if metroFIPS == 12260 & stateFIPS == 13 & fips_place_code == 4204
+(80 real changes made)
+
+. 
+. 
+. //Illinois 
+. * Chicago June 6, 2007 (public)
+. replace btb_eff_city = 2008 if metroFIPS == 16980 & stateFIPS == 17 & fips_place_code == 14000
+(144 real changes made)
+
+. * Chicago November 5, 2014 (contract)
+. replace btb_eff_city_con = 2015 if metroFIPS == 16980 & stateFIPS == 17 & fips_place_code == 14000
+(144 real changes made)
+
+. * Chicago November 5, 2014 (private)
+. replace btb_eff_city_pri = 2015 if metroFIPS == 16980 & stateFIPS == 17 & fips_place_code == 14000
+(144 real changes made)
+
+. 
+. 
+. //Indiana 
+. * Indianapolis, IN June 5, 2014 (public)
+. replace btb_eff_city = 2015 if metroFIPS == 26900 & stateFIPS == 18 & fips_place_code == 36003
+(176 real changes made)
+
+. * Indianapolis, IN June 5, 2014 (contract)
+. replace btb_eff_city_con = 2015 if metroFIPS == 26900 & stateFIPS == 18 & fips_place_code == 36003
+(176 real changes made)
+
+. 
+. 
+. //Iowa
+. * Linn County May 16, 2018 (public, covers Cedar Rapids)
+. replace btb_eff_city = 2019 if metroFIPS == 16300 & stateFIPS == 19 & fips_county_code == 113
+(16 real changes made)
+
+. replace county_special = 1 if stateFIPS == 19 & fips_county_code == 113
+(16 real changes made)
+
+. * Johnson County June 14, 2018 (public, covers Iowa City)
+. replace btb_eff_city = 2019 if metroFIPS == 26980 & stateFIPS == 19 & fips_county_code == 103
+(16 real changes made)
+
+. replace county_special = 1 if stateFIPS == 19 & fips_county_code == 103
+(16 real changes made)
+
+. 
+. 
+. //Kansas
+. * Kansas City November 6, 2014 (public):
+. replace btb_eff_city = 2015 if metroFIPS == 28140 & stateFIPS == 20 & fips_place_code == 36000
+(80 real changes made)
+
+. * Wyandotte County November 6, 2014 (public covered by Kansas City)
+. *replace btb_eff_city = 2015 if metroFIPS == 28140 & stateFIPS == 20 & fips_county_code == 209 & fips_place_code != 36000
+. *replace county_special = 1 if stateFIPS == 20 & fips_county_code == 209
+. *Wichita July 9, 2015 (public)
+. replace btb_eff_city = 2016 if metroFIPS == 48620 & stateFIPS == 20 & fips_place_code == 79000
+(80 real changes made)
+
+. *Topeka July 2015 (public)
+. replace btb_eff_city = 2016 if metroFIPS == 45820 & stateFIPS == 20 & fips_place_code == 71000
+(80 real changes made)
+
+. * Johnson County May 19, 2016 (public)
+. replace btb_eff_city = 2017 if metroFIPS == 28140 & stateFIPS == 20 & fips_county_code == 91
+(32 real changes made)
+
+. replace county_special = 1 if stateFIPS == 20 & fips_county_code == 91
+(32 real changes made)
+
+. 
+. 
+. //Kentucky 
+. * Louisville March 13, 2014 (public & contract)
+. replace btb_eff_city = 2015 if metroFIPS == 31140 & stateFIPS == 21 & fips_place_code == 48006
+(112 real changes made)
+
+. replace btb_eff_city_con = 2015 if metroFIPS == 31140 & stateFIPS == 21 & fips_place_code == 48006
+(112 real changes made)
+
+. 
+. 
+. //Kansas 
+. * Kansas City November 6, 2014 (public): not effective during ACS sample but needed for map
+. replace btb_eff_city_eos = 2014 if metroFIPS == 28140 & stateFIPS == 20 & fips_place_code == 36000
+(80 real changes made)
+
+. * Wyandotte County November 6, 2014 (public covered by Kansas City): not effective during ACS sample but needed for map
+. replace btb_eff_city_eos = 2014 if metroFIPS == 28140 & stateFIPS == 20 & fips_county_code == 209 & fips_place_code != 36000
+(16 real changes made)
+
+. *replace county_special = 1 if stateFIPS == 20 & fips_county_code == 209
+. 
+. 
+. //Louisiana 
+. * New Orleans January 10, 2014 (public)
+. replace btb_eff_city = 2014 if metroFIPS == 35380 & stateFIPS == 22 & fips_place_code == 55000
+(128 real changes made)
+
+. * Baton Rouge November 10, 2015 (public)
+. replace btb_eff_city = 2016 if metroFIPS == 12940 & stateFIPS == 22 & fips_place_code == 5000
+(144 real changes made)
+
+. 
+. 
+. //Maryland 
+. * Baltimore December 1, 2007 (public)
+. replace btb_eff_city = 2008 if metroFIPS == 12580 & stateFIPS == 24 & fips_place_code == 04000
+(112 real changes made)
+
+. * Baltimore, MD August 13, 2014 (contract)
+. replace btb_eff_city_con = 2015 if metroFIPS == 12580 & stateFIPS == 24 & fips_place_code == 04000
+(112 real changes made)
+
+. * Baltimore, MD August 13, 2014 (private)
+. replace btb_eff_city_pri = 2015 if metroFIPS == 12580 & stateFIPS == 24 & fips_place_code == 04000
+(112 real changes made)
+
+. * Prince George's County December 4, 2014 (public)
+. replace btb_eff_city = 2015 if metroFIPS == 47900 & stateFIPS == 24 & fips_county_code == 33
+(80 real changes made)
+
+. * Prince George's County, MD January 20, 2015 (contract)
+. replace btb_eff_city_con = 2016 if metroFIPS == 47900 & stateFIPS == 24 & fips_county_code == 33
+(80 real changes made)
+
+. * Prince George's County, MD January 20, 2015 (private)
+. replace btb_eff_city_pri = 2016 if metroFIPS == 47900 & stateFIPS == 24 & fips_county_code == 33
+(80 real changes made)
+
+. * Montgomery County January 1, 2015 (public Bethesda, Gaithersburg, Rockville, Silver Spring):
+. replace btb_eff_city = 2015 if metroFIPS == 47900 & stateFIPS == 24 & fips_county_code == 31
+(80 real changes made)
+
+. * Montgomery County, MD January 1, 2015 (contract)
+. replace btb_eff_city_con = 2015 if metroFIPS == 47900 & stateFIPS == 24 & fips_county_code == 31
+(80 real changes made)
+
+. * Montgomery County, MD January 1, 2015 (private)
+. replace btb_eff_city_pri = 2015 if metroFIPS == 47900 & stateFIPS == 24 & fips_county_code == 31
+(80 real changes made)
+
+. 
+. 
+. //Massachusetts 
+. * Boston July 1, 2006 (public)
+. replace btb_eff_city = 2007 if metroFIPS == 14460 & stateFIPS == 25 & fips_place_code == 07000
+(80 real changes made)
+
+. * Boston July 1, 2006 (contract)  
+. replace btb_eff_city_con = 2007 if metroFIPS == 14460 & stateFIPS == 25 & fips_place_code == 07000
+(80 real changes made)
+
+. * Cambridge May 1, 2007 (public)
+. replace btb_eff_city = 2008 if metroFIPS == 14460 & stateFIPS == 25 & fips_place_code == 11000
+(80 real changes made)
+
+. * Cambridge January 28, 2008 (contract)
+. replace btb_eff_city_con = 2009 if metroFIPS == 14460 & stateFIPS == 25 & fips_place_code == 11000
+(80 real changes made)
+
+. * Worcester September 1, 2009 (public)
+. replace btb_eff_city = 2010 if metroFIPS == 49340 & stateFIPS == 25 & fips_place_code == 82000
+(16 real changes made)
+
+. * Worcester, MA September 1, 2009 (contract)
+. replace btb_eff_city_con = 2010 if metroFIPS == 49340 & stateFIPS == 25 & fips_place_code == 82000
+(16 real changes made)
+
+. 
+. 
+. //Michigan 
+. * Ann Arbor May 5, 2014 (public):
+. replace btb_eff_city = 2015 if metroFIPS == 11460 & stateFIPS == 26 & fips_place_code == 03000
+(16 real changes made)
+
+. * Detroit September 13, 2010 (public)
+. replace btb_eff_city = 2011 if metroFIPS == 19820 & stateFIPS == 26 & fips_place_code == 22000
+(96 real changes made)
+
+. * Detroit, MI February 1, 2012 (contract)
+. replace btb_eff_city_con = 2013 if metroFIPS == 19820 & stateFIPS == 26 & fips_place_code == 22000
+(96 real changes made)
+
+. * East Lansing April 15, 2014 (public):
+. replace btb_eff_city = 2015 if metroFIPS == 29620 & stateFIPS == 26 & fips_place_code == 24120
+(48 real changes made)
+
+. * Genesee County June 1, 2014 (public Flint):
+. replace btb_eff_city = 2015 if metroFIPS == 22420 & stateFIPS == 26 & fips_county_code == 49
+(16 real changes made)
+
+. replace county_special = 1 if stateFIPS == 26 & fips_county_code == 49
+(16 real changes made)
+
+. * Kalamazoo January 1, 2010 (public)
+. replace btb_eff_city = 2010 if metroFIPS == 28020 & stateFIPS == 26 & fips_place_code == 42160
+(32 real changes made)
+
+. * Kalamazoo May 16, 2016 (contract)
+. replace btb_eff_city_con = 2017 if metroFIPS == 28020 & stateFIPS == 26 & fips_place_code == 42160
+(32 real changes made)
+
+. * Muskegon January 12, 2012 (public)
+. replace btb_eff_city = 2012 if metroFIPS == 34740 & stateFIPS == 26 & fips_place_code == 56320
+(16 real changes made)
+
+. 
+. 
+. //Minnesota
+. * Minneapolis December 1, 2006 (public)
+. replace btb_eff_city = 2007 if metroFIPS == 33460 & stateFIPS == 27 & fips_place_code == 43000
+(224 real changes made)
+
+. * St. Paul December 5, 2006 (public)
+. replace btb_eff_city = 2007 if metroFIPS == 33460 & stateFIPS == 27 & fips_place_code == 58000
+(224 real changes made)
+
+. 
+. 
+. //Missouri
+. * Columbia December 1, 2014 (public)
+. replace btb_eff_city = 2015 if metroFIPS == 17860 & stateFIPS == 29 & fips_place_code == 15670
+(16 real changes made)
+
+. * Columbia December 1, 2014 (contract)
+. replace btb_eff_city_con = 2015 if metroFIPS == 17860 & stateFIPS == 29 & fips_place_code == 15670
+(16 real changes made)
+
+. * Columbia December 1, 2014 (private)
+. replace btb_eff_city_pri = 2015 if metroFIPS == 17860 & stateFIPS == 29 & fips_place_code == 15670
+(16 real changes made)
+
+. * Kansas City April 4, 2013 (public) -> Effective 2014 (this is the FIRST public BTB for KCMO)
+. replace btb_eff_city = 2014 if metroFIPS == 28140 & stateFIPS == 29 & fips_place_code == 38000
+(144 real changes made)
+
+. * Kansas City February 1, 2018 (public): a later PRIVATE-sector expansion, not a new first-treatment date.
+. * Do NOT overwrite btb_eff_city here -- it must hold the earliest public BTB date (2014). Overwriting
+. * it with 2019 wrongly turned Kansas City OFF in 2014 and broke the 2004-2014 cutoff replication.
+. * Kansas City February 1, 2018 (contract)
+. replace btb_eff_city_con = 2019 if metroFIPS == 28140 & stateFIPS == 29 & fips_place_code == 38000
+(144 real changes made)
+
+. * Kansas City February 1, 2018 (private)
+. replace btb_eff_city_pri = 2019 if metroFIPS == 28140 & stateFIPS == 29 & fips_place_code == 38000
+(144 real changes made)
+
+. * St. Louis October 1, 2014 (public)
+. replace btb_eff_city = 2015 if metroFIPS == 41180 & stateFIPS == 29 & fips_place_code == 65000
+(112 real changes made)
+
+. 
+. 
+. //Nevada
+. * North Las Vegas administrative policy dated February 9, 2017 (public) -> Effective 2018.
+. * Oct. 14, 2016 announcement of intent to ban the box is not itself the operative policy
+. * document. Not a principal city, so made further down. Coincides with the 2018 NV state
+. * law, so this has no effect on the final BTB variable but corrects the underlying local-law data.
+. 
+. 
+. //New Jersey
+. * Atlantic City December 23, 2011 (public)
+. replace btb_eff_city = 2012 if metroFIPS == 12100 & stateFIPS == 34 & fips_place_code == 02080
+(16 real changes made)
+
+. * Atlantic City December 23, 2011 (contract)
+. replace btb_eff_city_con = 2012 if metroFIPS == 12100 & stateFIPS == 34 & fips_place_code == 02080
+(16 real changes made)
+
+. * Newark, NJ November 18, 2012 (public)
+. replace btb_eff_city = 2013 if metroFIPS == 35620 & stateFIPS == 34 & fips_place_code == 51000
+(192 real changes made)
+
+. * Newark, NJ November 18, 2012 (contract)
+. replace btb_eff_city_con = 2013 if metroFIPS == 35620 & stateFIPS == 34 & fips_place_code == 51000
+(192 real changes made)
+
+. * Newark, NJ November 18, 2012 (private)
+. replace btb_eff_city_pri = 2013 if metroFIPS == 35620 & stateFIPS == 34 & fips_place_code == 51000
+(192 real changes made)
+
+. 
+. 
+. //New York
+. * New York City October 3, 2011 (public covers Yonkers November 2014)
+. replace btb_eff_city = 2012 if metroFIPS == 35620 & stateFIPS == 36 & fips_place_code == 51000
+(192 real changes made)
+
+. * Yonkers November 1, 2014 (public)
+. * New York City October 27, 2015 (contract)
+. replace btb_eff_city_con = 2016 if metroFIPS == 35620 & stateFIPS == 36 & fips_place_code == 51000
+(192 real changes made)
+
+. * New York City October 27, 2015 (private)
+. replace btb_eff_city_pri = 2016 if metroFIPS == 35620 & stateFIPS == 36 & fips_place_code == 51000
+(192 real changes made)
+
+. * Buffalo June 11, 2013 (public)
+. replace btb_eff_city = 2014 if metroFIPS == 15380 & stateFIPS == 36 & fips_place_code == 11000
+(32 real changes made)
+
+. * Buffalo June 11, 2013 (contract)
+. replace btb_eff_city_con = 2014 if metroFIPS == 15380 & stateFIPS == 36 & fips_place_code == 11000
+(32 real changes made)
+
+. * Buffalo June 11, 2013 (private)
+. replace btb_eff_city_pri = 2014 if metroFIPS == 15380 & stateFIPS == 36 & fips_place_code == 11000
+(32 real changes made)
+
+. * Rochester May 20, 2014 (public)
+. replace btb_eff_city = 2015 if metroFIPS == 40380 & stateFIPS == 36 & fips_place_code == 63000
+(96 real changes made)
+
+. * Rochester May 20, 2014 (contract)
+. replace btb_eff_city_con = 2015 if metroFIPS == 40380 & stateFIPS == 36 & fips_place_code == 63000
+(96 real changes made)
+
+. * Rochester May 20, 2014 (private)
+. replace btb_eff_city_pri = 2015 if metroFIPS == 40380 & stateFIPS == 36 & fips_place_code == 63000
+(96 real changes made)
+
+. * Syracuse December 8, 2014 (public & contract) -> Effective 2015 (per Avery 2021; ordinance
+. * also covers licensure, not tracked as a separate variable here)
+. replace btb_eff_city = 2015 if metroFIPS == 45060 & stateFIPS == 36 & fips_place_code == 73000
+(48 real changes made)
+
+. replace btb_eff_city_con = 2015 if metroFIPS == 45060 & stateFIPS == 36 & fips_place_code == 73000
+(48 real changes made)
+
+. * Newburgh August 10, 2015 (public) -> Effective 2016 (after Jan 15)
+. replace btb_eff_city = 2016 if metroFIPS == 35620 & stateFIPS == 36 & fips_place_code == 50034
+(0 real changes made)
+
+. * Kingston September 2015 (public)
+. replace btb_eff_city = 2016 if metroFIPS == 28740 & stateFIPS == 36 & fips_place_code == 39727
+(16 real changes made)
+
+. * Ithaca December 23, 2015 (public)
+. replace btb_eff_city = 2016 if metroFIPS == 27060 & stateFIPS == 36 & fips_place_code == 38077
+(16 real changes made)
+
+. * Ulster County January 1, 2015 (public)
+. replace btb_eff_city = 2015 if metroFIPS == 28740 & stateFIPS == 36 & fips_county_code == 111
+(16 real changes made)
+
+. replace county_special = 1 if stateFIPS == 36 & fips_county_code == 111
+(16 real changes made)
+
+. * Dutchess County February 1, 2016 (public)
+. replace btb_eff_city = 2017 if metroFIPS == 35620 & stateFIPS == 36 & fips_county_code == 27
+(32 real changes made)
+
+. replace county_special = 1 if stateFIPS == 36 & fips_county_code == 27
+(32 real changes made)
+
+. * Tompkins County July 5, 2016 (public - excludes Ithaca city proper, which passed its own
+. * earlier law Dec. 23, 2015; Ithaca MSA 27060 consists solely of Tompkins County, so without
+. * this exclusion the county line silently overwrites Ithaca's earlier, correct date with the
+. * later county date, same overwrite bug as Kansas City and Chattanooga above)
+. replace btb_eff_city = 2017 if metroFIPS == 27060 & stateFIPS == 36 & fips_county_code == 109 & fips_place_code != 38077
+(0 real changes made)
+
+. replace county_special = 1 if stateFIPS == 36 & fips_county_code == 109
+(16 real changes made)
+
+. * Albany County February 13, 2017 (public)
+. replace btb_eff_city = 2018 if metroFIPS == 10580 & stateFIPS == 36 & fips_county_code == 1
+(48 real changes made)
+
+. replace county_special = 1 if stateFIPS == 36 & fips_county_code == 1
+(48 real changes made)
+
+. * Westchester County April 9, 2018 (public)
+. replace btb_eff_city = 2019 if metroFIPS == 35620 & stateFIPS == 36 & fips_county_code == 119
+(32 real changes made)
+
+. replace county_special = 1 if stateFIPS == 36 & fips_county_code == 119
+(32 real changes made)
+
+. * Woodstock November 18, 2014 (public Kingston): would need to be made further down bc it's not a principal city
+. 
+. 
+. //North Carolina
+. * Durham February 1, 2011 (public)
+. replace btb_eff_city = 2012 if metroFIPS == 20500 & stateFIPS == 37 & fips_place_code == 19000
+(64 real changes made)
+
+. * Durham County October 1, 2012 (public - excludes Durham city proper)
+. replace btb_eff_city = 2013 if metroFIPS == 20500 & stateFIPS == 37 & fips_county_code == 63 & fips_place_code != 19000
+(16 real changes made)
+
+. replace county_special = 1 if stateFIPS == 37 & fips_county_code == 63
+(32 real changes made)
+
+. * Charlotte February 28, 2014 (public)
+. replace btb_eff_city = 2015 if metroFIPS == 16740 & stateFIPS == 37 & fips_place_code == 12000
+(112 real changes made)
+
+. * Mecklenburg County March 16, 2016 (public - excludes Charlotte city proper)
+. replace btb_eff_city = 2017 if metroFIPS == 16740 & stateFIPS == 37 & fips_county_code == 119 & fips_place_code != 12000
+(32 real changes made)
+
+. replace county_special = 1 if stateFIPS == 37 & fips_county_code == 119
+(48 real changes made)
+
+. * Cumberland County September 6, 2011 (public)
+. replace btb_eff_city = 2012 if metroFIPS == 22180 & stateFIPS == 37 & fips_county_code == 51
+(16 real changes made)
+
+. replace county_special = 1 if stateFIPS == 37 & fips_county_code == 51
+(16 real changes made)
+
+. * Asheville January 26, 2016 (public)
+. replace btb_eff_city = 2017 if metroFIPS == 11700 & stateFIPS == 37 & fips_place_code == 2140
+(64 real changes made)
+
+. * Buncombe County April 19, 2016 (public, overrides with city law below)
+. replace btb_eff_city = 2017 if metroFIPS == 11700 & stateFIPS == 37 & fips_county_code == 21
+(0 real changes made)
+
+. replace county_special = 1 if stateFIPS == 37 & fips_county_code == 21
+(16 real changes made)
+
+. * Wake County February 1, 2016 (public)
+. replace btb_eff_city = 2017 if metroFIPS == 39580 & stateFIPS == 37 & fips_county_code == 183
+(16 real changes made)
+
+. replace county_special = 1 if stateFIPS == 37 & fips_county_code == 183
+(16 real changes made)
+
+. * New Hanover County July 1, 2016 (public)
+. replace btb_eff_city = 2017 if metroFIPS == 48900 & stateFIPS == 37 & fips_county_code == 129
+(16 real changes made)
+
+. replace county_special = 1 if stateFIPS == 37 & fips_county_code == 129
+(16 real changes made)
+
+. * Wilmington May 1, 2018 (public covered by New Hanover County): Wilmington is the sole
+. * principal city of MSA 48900 (which consists of New Hanover + Pender counties), so this
+. * later, place-level replace would unconditionally overwrite BOTH of Wilmington's
+. * cross-joined county copies, erasing the earlier, binding New Hanover County date (2017)
+. * and wrongly pushing the MSA's effective date to 2019. Since the county law already
+. * covers Wilmington starting 2017, this city-specific entry is redundant and left inactive.
+. *replace btb_eff_city = 2019 if metroFIPS == 48900 & stateFIPS == 37 & fips_place_code == 74440
+. * Winston-Salem November 20, 2017 (public)
+. replace btb_eff_city = 2018 if metroFIPS == 49180 & stateFIPS == 37 & fips_place_code == 75000
+(80 real changes made)
+
+. * Forsyth County April 12, 2018 (public, overrides with city law below)
+. replace btb_eff_city = 2019 if metroFIPS == 49180 & stateFIPS == 37 & fips_county_code == 67
+(16 real changes made)
+
+. replace county_special = 1 if stateFIPS == 37 & fips_county_code == 67
+(16 real changes made)
+
+. * Spring Lake June 25, 2012 (public covered by Cumberland County)
+. *replace btb_eff_city = 2013 if metroFIPS == 22180 & stateFIPS == 37 & fips_place_code == 
+. 
+. 
+. //Ohio 
+. * Cincinnati August 1, 2010 (public)
+. replace btb_eff_city = 2011 if metroFIPS == 17140 & stateFIPS == 39 & fips_place_code == 15000
+(80 real changes made)
+
+. * Hamilton County March 1, 2012 (public, overrides with city law below)
+. replace btb_eff_city = 2013 if metroFIPS == 17140 & stateFIPS == 39 & fips_county_code == 61
+(16 real changes made)
+
+. replace county_special = 1 if stateFIPS == 39 & fips_county_code == 61
+(16 real changes made)
+
+. * Cleveland September 26, 2011 (public)
+. replace btb_eff_city = 2012 if metroFIPS == 17460 & stateFIPS == 39 & fips_place_code == 16000
+(80 real changes made)
+
+. * Cuyahoga County September 30, 2012 (public covered by Cleveland)
+. replace btb_eff_city = 2013 if metroFIPS == 17460 & stateFIPS == 39 & fips_county_code == 35 & fips_place_code != 16000
+(16 real changes made)
+
+. replace county_special = 1 if stateFIPS == 39 & fips_county_code == 35
+(32 real changes made)
+
+. * Stark County May 1, 2013 (public Canton, Massillon, Alliance)
+. replace btb_eff_city = 2014 if metroFIPS == 15940 & stateFIPS == 39 & fips_county_code == 151
+(32 real changes made)
+
+. replace county_special = 1 if stateFIPS == 39 & fips_county_code == 151
+(32 real changes made)
+
+. * Canton May 15, 2013 (public covered by Stark County)
+. *replace btb_eff_city = 2014 if metroFIPS == 15940 & stateFIPS == 39 & fips_place_code == 12000
+. * Massillon January 3, 2014 (public covered by Stark County)
+. *replace btb_eff_city = 2014 if metroFIPS == 15940 & stateFIPS == 39 & fips_place_code == 48244
+. * Alliance December 1, 2014 (public): not a principal city, and preceded by another law in MSA
+. *replace btb_eff_city = 2015 if metroFIPS == 15940 & stateFIPS == 39 & fips_place_code == 
+. * Franklin County June 19, 2012 (public Columbus)
+. replace btb_eff_city = 2013 if metroFIPS == 18140 & stateFIPS == 39 & fips_county_code == 49
+(16 real changes made)
+
+. replace county_special = 1 if stateFIPS == 39 & fips_county_code == 49
+(16 real changes made)
+
+. * Lucas County October 29, 2013 (public Toledo)
+. replace btb_eff_city = 2014 if metroFIPS == 45780 & stateFIPS == 39 & fips_county_code == 95
+(16 real changes made)
+
+. replace county_special = 1 if stateFIPS == 39 & fips_county_code == 95
+(16 real changes made)
+
+. * Summit County September 1, 2012 (public covers Akron)
+. replace btb_eff_city = 2013 if metroFIPS == 10420 & stateFIPS == 39 & fips_county_code == 153
+(16 real changes made)
+
+. replace county_special = 1 if stateFIPS == 39 & fips_county_code == 153
+(16 real changes made)
+
+. * Akron October 29, 2013 (public covered by Summit County)
+. *replace btb_eff_city = 2014 if metroFIPS == 10420 & stateFIPS == 39 & fips_place_code == 01000
+. * Youngstown March 19, 2014 (public)
+. replace btb_eff_city = 2015 if metroFIPS == 49660 & stateFIPS == 39 & fips_place_code == 88000
+(32 real changes made)
+
+. * Newark 2015 (public) [NOT a principal city of Columbus MSA 18140 — only Columbus is].
+. *replace btb_eff_city = 2016 if metroFIPS == 18140 & stateFIPS == 39 & fips_place_code == 54040
+. 
+. 
+. //Oregon
+. * Multnomah County October 10, 2007 (public Portland)
+. replace btb_eff_city = 2008 if metroFIPS == 38900 & stateFIPS == 41 & fips_county_code == 51
+(48 real changes made)
+
+. replace county_special = 1 if stateFIPS == 41 & fips_county_code == 51
+(48 real changes made)
+
+. * Portland July 9, 2014 (public covered by Multnomah County):
+. *replace btb_eff_city = 2015 if metroFIPS == 38900 & stateFIPS == 41 & fips_place_code == 59000
+. 
+. 
+. 
+. //Pennsylvania
+. * Lancaster October 1, 2014 (public)
+. replace btb_eff_city = 2015 if metroFIPS == 29540 & stateFIPS == 42 & fips_place_code == 41216
+(16 real changes made)
+
+. * Philadelphia June 29, 2011 (public)
+. replace btb_eff_city = 2012 if metroFIPS == 37980 & stateFIPS == 42 & fips_place_code == 60000
+(80 real changes made)
+
+. * Philadelphia June 29, 2011 (contract)
+. replace btb_eff_city_con = 2012 if metroFIPS == 37980 & stateFIPS == 42 & fips_place_code == 60000
+(80 real changes made)
+
+. * Philadelphia June 29, 2011 (private)
+. replace btb_eff_city_pri = 2012 if metroFIPS == 37980 & stateFIPS == 42 & fips_place_code == 60000
+(80 real changes made)
+
+. * Pittsburgh December 31, 2012 (public)
+. replace btb_eff_city = 2013 if metroFIPS == 38300 & stateFIPS == 42 & fips_place_code == 61000
+(112 real changes made)
+
+. * Pittsburgh December 31, 2012 (contract)
+. replace btb_eff_city_con = 2013 if metroFIPS == 38300 & stateFIPS == 42 & fips_place_code == 61000
+(112 real changes made)
+
+. * Allegheny County November 24, 2014 (public, overrides with city law below)
+. replace btb_eff_city = 2015 if metroFIPS == 38300 & stateFIPS == 42 & fips_county_code == 3
+(16 real changes made)
+
+. replace county_special = 1 if stateFIPS == 42 & fips_county_code == 3
+(16 real changes made)
+
+. * Allentown April 1, 2015 (public/contractor) -> Effective 2016 (per Avery 2021; was
+. * previously coded as "2014 approx." -> 2015, one year too early)
+. replace btb_eff_city = 2016 if metroFIPS == 10900 & stateFIPS == 42 & fips_place_code == 2000
+(48 real changes made)
+
+. replace btb_eff_city_con = 2016 if metroFIPS == 10900 & stateFIPS == 42 & fips_place_code == 2000
+(48 real changes made)
+
+. * Reading March 9, 2015 (public) -> Effective 2016 (per Avery 2021; was previously coded
+. * as "2014 approx." -> 2015, one year too early)
+. replace btb_eff_city = 2016 if metroFIPS == 39740 & stateFIPS == 42 & fips_place_code == 63624
+(16 real changes made)
+
+. * York signed May 22, 2018 / effective June 11, 2018 (public) -> Effective 2019 (per Avery
+. * 2021; was previously coded as "2014 approx." -> 2015, three years too early). In practice
+. * PA's statewide law (effective 2018) already covers York before its own city ordinance
+. * takes effect, so the binding date for York MSA becomes 2018 via btb_eff_state.
+. replace btb_eff_city = 2019 if metroFIPS == 49620 & stateFIPS == 42 & fips_place_code == 87048
+(16 real changes made)
+
+. * Beaver County 2015 approx. (public)
+. replace btb_eff_city = 2016 if metroFIPS == 38300 & stateFIPS == 42 & fips_county_code == 7
+(16 real changes made)
+
+. replace county_special = 1 if stateFIPS == 42 & fips_county_code == 7
+(16 real changes made)
+
+. * Bethlehem March 14, 2016 (public)
+. replace btb_eff_city = 2017 if metroFIPS == 10900 & stateFIPS == 42 & fips_place_code == 6088
+(48 real changes made)
+
+. * Northampton County April 30, 2018 (public - excludes Bethlehem city proper)
+. replace btb_eff_city = 2019 if metroFIPS == 10900 & stateFIPS == 42 & fips_county_code == 95 & fips_place_code != 6088
+(16 real changes made)
+
+. replace county_special = 1 if stateFIPS == 42 & fips_county_code == 95
+(32 real changes made)
+
+. 
+. 
+. //Rhode Island
+. * Providence April 1, 2009 (public)
+. replace btb_eff_city = 2010 if metroFIPS == 39300 & stateFIPS == 44 & fips_place_code == 59000
+(80 real changes made)
+
+. 
+. 
+. //South Carolina
+. * York County January 17, 2017 (public)
+. replace btb_eff_city = 2018 if metroFIPS == 16740 & stateFIPS == 45 & fips_county_code == 91
+(16 real changes made)
+
+. 
+. 
+. //Tennessee
+. * Memphis July 9, 2010 (public)
+. replace btb_eff_city = 2011 if metroFIPS == 32820 & stateFIPS == 47 & fips_place_code == 48000
+(48 real changes made)
+
+. * Hamilton County January 1, 2012 (public, covers Chattanooga; predates and supersedes the
+. * city's own December 1, 2015 resolution, so the city is not separately coded)
+. replace btb_eff_city = 2012 if metroFIPS == 16860 & stateFIPS == 47 & fips_county_code == 65
+(16 real changes made)
+
+. replace county_special = 1 if stateFIPS == 47 & fips_county_code == 65
+(16 real changes made)
+
+. * Nashville January 1, 2016 (public consolidated balance)
+. replace btb_eff_city = 2016 if metroFIPS == 34980 & stateFIPS == 47 & fips_place_code == 52006
+(224 real changes made)
+
+. * NOTE: "Chattanooga (City) January 7, 2017 (public)" was previously coded here but has been
+. * removed -- per Avery (2021), January 7, 2017 is the effective date of Chattanooga Ordinance
+. * No. 13007, which removes a Tennessee voter-eligibility requirement for city employees and
+. * replaces it with a residency requirement. It is unrelated to ban-the-box/fair-chance hiring
+. * and does not belong in this file. Chattanooga's actual fair-chance action was a December 1,
+. * 2015 city council resolution, which in any case postdates (and is superseded by) Hamilton
+. * County's 2012 law above, so no separate city-level entry is needed.
+. 
+. 
+. //Texas 
+. * Travis County April 15, 2008 (public - covers Austin October 2008)
+. replace btb_eff_city = 2009 if metroFIPS == 12420 & stateFIPS == 48 & fips_county_code == 453
+(32 real changes made)
+
+. replace county_special = 1 if stateFIPS == 48 & fips_county_code == 453
+(32 real changes made)
+
+. * Austin March 24, 2016 (contract & private)
+. replace btb_eff_city_con = 2017 if metroFIPS == 12420 & stateFIPS == 48 & fips_place_code == 5000
+(80 real changes made)
+
+. replace btb_eff_city_pri = 2017 if metroFIPS == 12420 & stateFIPS == 48 & fips_place_code == 5000
+(80 real changes made)
+
+. * Dallas County October 2015 (public)
+. replace btb_eff_city = 2016 if metroFIPS == 19100 & stateFIPS == 48 & fips_county_code == 113
+(112 real changes made)
+
+. replace county_special = 1 if stateFIPS == 48 & fips_county_code == 113
+(112 real changes made)
+
+. * San Antonio December 7, 2016 (public)
+. replace btb_eff_city = 2017 if metroFIPS == 41700 & stateFIPS == 48 & fips_place_code == 65000
+(128 real changes made)
+
+. 
+. 
+. //Virginia
+. * Newport News October 1, 2012 (public)
+. replace btb_eff_city = 2013 if metroFIPS == 47260 & stateFIPS == 51 & fips_place_code == 56000
+(224 real changes made)
+
+. * Portsmouth April 1, 2013 (public)
+. replace btb_eff_city = 2014 if metroFIPS == 47260 & stateFIPS == 51 & fips_place_code == 64000
+(224 real changes made)
+
+. * Norfolk July 23, 2013 (public)
+. replace btb_eff_city = 2014 if metroFIPS == 47260 & stateFIPS == 51 & fips_place_code == 57000
+(224 real changes made)
+
+. * Virginia Beach November 1, 2013 (public)
+. replace btb_eff_city = 2014 if metroFIPS == 47260 & stateFIPS == 51 & fips_place_code == 82000
+(224 real changes made)
+
+. * Richmond March 25, 2013 (public)
+. replace btb_eff_city = 2014 if metroFIPS == 40060 & stateFIPS == 51 & fips_place_code == 67000
+(272 real changes made)
+
+. * Alexandria March 19, 2014 (public)
+. replace btb_eff_city = 2015 if metroFIPS == 47900 & stateFIPS == 51 & fips_place_code == 01000
+(272 real changes made)
+
+. * Charlottesville March 1, 2014 (public)
+. replace btb_eff_city = 2015 if metroFIPS == 16820 & stateFIPS == 51 & fips_place_code == 14968
+(96 real changes made)
+
+. * Fredericksburg June 5, 2014 (public)
+. * [NOT a principal city of Washington-Arlington-Alexandria MSA 47900.
+. *  Covered by DC/Arlington/other laws already.]
+. *replace btb_eff_city = 2015 if metroFIPS == 47900 & stateFIPS == 51 & fips_place_code == 29744
+. * Harrisonburg September 2014 (public) 
+. replace btb_eff_city = 2015 if metroFIPS == 25500 & stateFIPS == 51 & fips_place_code == 35624
+(32 real changes made)
+
+. * Roanoke January 1, 2015 (public) 
+. replace btb_eff_city = 2015 if metroFIPS == 40220 & stateFIPS == 51 & fips_place_code == 68000
+(96 real changes made)
+
+. * Staunton February 25, 2016 (public) 
+. replace btb_eff_city = 2017 if metroFIPS == 44420 & stateFIPS == 51 & fips_place_code == 75216
+(48 real changes made)
+
+. * Blacksburg January 19, 2016 (public) 
+. replace btb_eff_city = 2017 if metroFIPS == 13980 & stateFIPS == 51 & fips_place_code == 7784
+(80 real changes made)
+
+. * Arlington County November 3, 2014 (public) 
+. replace btb_eff_city = 2015 if metroFIPS == 47900 & stateFIPS == 51 & fips_county_code == 13
+(32 real changes made)
+
+. replace county_special = 1 if stateFIPS == 51 & fips_county_code == 13
+(48 real changes made)
+
+. * Fairfax County October 2014 (public)
+. replace btb_eff_city = 2015 if metroFIPS == 47900 & stateFIPS == 51 & fips_county_code == 59
+(32 real changes made)
+
+. replace county_special = 1 if stateFIPS == 51 & fips_county_code == 59
+(48 real changes made)
+
+. * Prince William County November 1, 2015 (public) 
+. replace btb_eff_city = 2016 if metroFIPS == 47900 & stateFIPS == 51 & fips_county_code == 153
+(48 real changes made)
+
+. replace county_special = 1 if stateFIPS == 51 & fips_county_code == 153
+(48 real changes made)
+
+. * Montgomery County January 26, 2016 (public - excludes Blacksburg town)
+. replace btb_eff_city = 2017 if metroFIPS == 13980 & stateFIPS == 51 & fips_county_code == 121 & fips_place_code != 7784
+(32 real changes made)
+
+. replace county_special = 1 if stateFIPS == 51 & fips_county_code == 121
+(48 real changes made)
+
+. 
+. 
+. //Washington
+. * Seattle April 24, 2009 (public)
+. replace btb_eff_city = 2010 if metroFIPS == 42660 & stateFIPS == 53 & fips_place_code == 63000
+(48 real changes made)
+
+. * Seattle November 1, 2013 (contract & private)
+. replace btb_eff_city_con = 2014 if metroFIPS == 42660 & stateFIPS == 53 & fips_place_code == 63000
+(48 real changes made)
+
+. replace btb_eff_city_pri = 2014 if metroFIPS == 42660 & stateFIPS == 53 & fips_place_code == 63000
+(48 real changes made)
+
+. * Pierce County January 1, 2012 (public - excludes Tacoma city proper)
+. replace btb_eff_city = 2012 if metroFIPS == 42660 & stateFIPS == 53 & fips_county_code == 53 & fips_place_code != 70000
+(128 real changes made)
+
+. replace county_special = 1 if stateFIPS == 53 & fips_county_code == 53
+(144 real changes made)
+
+. * Tacoma June 30, 2015 (public)
+. replace btb_eff_city = 2016 if metroFIPS == 42660 & stateFIPS == 53 & fips_place_code == 70000
+(48 real changes made)
+
+. * Spokane (City) March 6, 2015 (public)
+. replace btb_eff_city = 2016 if metroFIPS == 44060 & stateFIPS == 53 & fips_place_code == 67000
+(48 real changes made)
+
+. * Spokane (City) June 14, 2018 (private expansion)
+. replace btb_eff_city_con = 2019 if metroFIPS == 44060 & stateFIPS == 53 & fips_place_code == 67000
+(48 real changes made)
+
+. replace btb_eff_city_pri = 2019 if metroFIPS == 44060 & stateFIPS == 53 & fips_place_code == 67000
+(48 real changes made)
+
+. * Spokane County October 27, 2017 (public - excludes Spokane city proper)
+. replace btb_eff_city = 2018 if metroFIPS == 44060 & stateFIPS == 53 & fips_county_code == 63 & fips_place_code != 67000
+(16 real changes made)
+
+. replace county_special = 1 if stateFIPS == 53 & fips_county_code == 63
+(32 real changes made)
+
+. 
+. 
+. //Wisconsin
+. * Milwaukee October 7, 2011 (public)
+. replace btb_eff_city = 2012 if metroFIPS == 33340 & stateFIPS == 55 & fips_place_code == 53000
+(64 real changes made)
+
+. * Dane County February 1, 2014 (public, overrides with city law below)
+. replace btb_eff_city = 2015 if metroFIPS == 31540 & stateFIPS == 55 & fips_county_code == 25
+(16 real changes made)
+
+. replace county_special = 1 if stateFIPS == 55 & fips_county_code == 25
+(16 real changes made)
+
+. * Madison (City) September 5, 2014 (public)
+. replace btb_eff_city = 2015 if metroFIPS == 31540 & stateFIPS == 55 & fips_place_code == 48000
+(48 real changes made)
+
+. * Madison (City) January 1, 2016 (contractor)
+. replace btb_eff_city_con = 2016 if metroFIPS == 31540 & stateFIPS == 55 & fips_place_code == 48000
+(64 real changes made)
+
+. 
+. gen btb_eff_city_pub = btb_eff_city
+(32,336 missing values generated)
+
+. 
+. 
+. *** now make statewide btb variables ***
+. 
+. *make btb effective date and btb treated variables
+. gen btb_eff_state_pub = .
+(42,096 missing values generated)
+
+. gen btb_eff_state_eos = . // for map, leftover
+(42,096 missing values generated)
+
+. gen btb_eff_state_con = .
+(42,096 missing values generated)
+
+. gen btb_eff_state_pri = .
+(42,096 missing values generated)
+
+. 
+. *Arizona November 6, 2017 (public)
+. replace btb_eff_state_pub = 2018 if stateFIPS == 04
+(256 real changes made)
+
+. *California June 25, 2010 (public)
+. replace btb_eff_state_pub = 2011 if stateFIPS == 06
+(2,832 real changes made)
+
+. *California January 1, 2018 (private)
+. replace btb_eff_state_pri = 2018 if stateFIPS == 06
+(2,832 real changes made)
+
+. *Colorado August 8, 2012 (public)
+. replace btb_eff_state_pub = 2013 if stateFIPS == 08
+(752 real changes made)
+
+. *Connecticut October 1, 2010 (public)
+. replace btb_eff_state_pub = 2011 if stateFIPS == 09
+(352 real changes made)
+
+. *Connecticut January 1, 2017 (private)
+. replace btb_eff_state_pri = 2017 if stateFIPS == 09
+(352 real changes made)
+
+. *Delaware Nov 4, 2014 (public)
+. replace btb_eff_state_pub = 2015 if stateFIPS == 10
+(48 real changes made)
+
+. *Georgia February 23, 2015 (public)
+. replace btb_eff_state_pub = 2016 if stateFIPS == 13
+(3,184 real changes made)
+
+. *Hawaii July 15, 1998 (public)
+. replace btb_eff_state_pub = 1999 if stateFIPS == 15
+(112 real changes made)
+
+. *Hawaii July 15, 1998 (contract)
+. replace btb_eff_state_con = 1999 if stateFIPS == 15
+(112 real changes made)
+
+. *Hawaii July 15, 1998 (private)
+. replace btb_eff_state_pri = 1999 if stateFIPS == 15
+(112 real changes made)
+
+. *Illinois January 1, 2014 (public)
+. replace btb_eff_state_pub = 2014 if stateFIPS == 17
+(1,920 real changes made)
+
+. *Illinois July 19, 2014 (contract)
+. replace btb_eff_state_con = 2015 if stateFIPS == 17
+(1,920 real changes made)
+
+. *Illinois July 19, 2014 (private)
+. replace btb_eff_state_pri = 2015 if stateFIPS == 17
+(1,920 real changes made)
+
+. *Indiana July 1, 2017 (public)
+. replace btb_eff_state_pub = 2018 if stateFIPS == 18
+(1,152 real changes made)
+
+. *Kansas May 2, 2018 (public)
+. replace btb_eff_state_pub = 2019 if stateFIPS == 20
+(384 real changes made)
+
+. *Kentucky February 1, 2017 (public)
+. replace btb_eff_state_pub = 2018 if stateFIPS == 21
+(608 real changes made)
+
+. *Louisiana August 1, 2016 (public)
+. replace btb_eff_state_pub = 2017 if stateFIPS == 22
+(784 real changes made)
+
+. *Maryland October 1, 2013 (public)
+. replace btb_eff_state_pub = 2014 if stateFIPS == 24
+(864 real changes made)
+
+. *Massachusetts August 6, 2010 (public)
+. replace btb_eff_state_pub = 2011 if stateFIPS == 25
+(496 real changes made)
+
+. *Massachusetts August 6, 2010 (contract)
+. replace btb_eff_state_con = 2011 if stateFIPS == 25
+(496 real changes made)
+
+. *Massachusetts August 6, 2010 (private)
+. replace btb_eff_state_pri = 2011 if stateFIPS == 25
+(496 real changes made)
+
+. *Michigan October 1, 2018 (public)
+. replace btb_eff_state_pub = 2019 if stateFIPS == 26
+(1,440 real changes made)
+
+. *Minnesota January 1, 2009 (public)
+. replace btb_eff_state_pub = 2009 if stateFIPS == 27
+(1,584 real changes made)
+
+. *Minnesota January 1, 2009 (contract)
+. replace btb_eff_state_con = 2009 if stateFIPS == 27
+(1,584 real changes made)
+
+. *Minnesota May 13, 2013 (private)
+. replace btb_eff_state_pri = 2014 if stateFIPS == 27
+(1,584 real changes made)
+
+. *Missouri July 10, 2016 (public)
+. replace btb_eff_state_pub = 2017 if stateFIPS == 29
+(656 real changes made)
+
+. *Nebraska April 16, 2014 (public)
+. replace btb_eff_state_pub = 2015 if stateFIPS == 31
+(208 real changes made)
+
+. *Nevada June 3, 2017 (public)
+. replace btb_eff_state_pub = 2018 if stateFIPS == 32
+(96 real changes made)
+
+. *New Jersey March 1, 2015 (public)
+. replace btb_eff_state_pub = 2016 if stateFIPS == 34
+(944 real changes made)
+
+. *New Jersey March 1, 2015 (private)
+. replace btb_eff_state_pri = 2016 if stateFIPS == 34
+(944 real changes made)
+
+. *New Mexico March 8, 2010 (public)
+. replace btb_eff_state_pub = 2011 if stateFIPS == 35
+(112 real changes made)
+
+. *New York September 21, 2015 (public)
+. replace btb_eff_state_pub = 2016 if stateFIPS == 36
+(1,072 real changes made)
+
+. *Ohio June 1, 2015 (public)
+. replace btb_eff_state_pub = 2016 if stateFIPS == 39
+(784 real changes made)
+
+. *Oklahoma February 24, 2016 (public)
+. replace btb_eff_state_pub = 2017 if stateFIPS == 40
+(288 real changes made)
+
+. *Oregon January 1, 2016 (public)
+. replace btb_eff_state_pub = 2016 if stateFIPS == 41
+(384 real changes made)
+
+. *Oregon January 1, 2016 (contract)
+. replace btb_eff_state_con = 2016 if stateFIPS == 41
+(384 real changes made)
+
+. *Oregon January 1, 2016 (private)
+. replace btb_eff_state_pri = 2016 if stateFIPS == 41
+(384 real changes made)
+
+. *Pennsylvania July 1, 2017 (public)
+. replace btb_eff_state_pub = 2018 if stateFIPS == 42
+(848 real changes made)
+
+. *Rhode Island July 15, 2013 (public)
+. replace btb_eff_state_pub = 2014 if stateFIPS == 44
+(160 real changes made)
+
+. *Rhode Island July 15, 2013 (contract)
+. replace btb_eff_state_con = 2014 if stateFIPS == 44
+(160 real changes made)
+
+. *Rhode Island July 15, 2013 (private)
+. replace btb_eff_state_pri = 2014 if stateFIPS == 44
+(160 real changes made)
+
+. *Tennessee April 14, 2016 (public)
+. replace btb_eff_state_pub = 2017 if stateFIPS == 47
+(1,152 real changes made)
+
+. *Utah May 8, 2017 (public)
+. replace btb_eff_state_pub = 2018 if stateFIPS == 49
+(256 real changes made)
+
+. *Vermont April 21, 2015 (public)
+. replace btb_eff_state_pub = 2016 if stateFIPS == 50
+(96 real changes made)
+
+. *Vermont July 1, 2017 (contract)
+. replace btb_eff_state_con = 2018 if stateFIPS == 50
+(96 real changes made)
+
+. *Vermont July 1, 2017 (private)
+. replace btb_eff_state_pri = 2018 if stateFIPS == 50
+(96 real changes made)
+
+. *Virginia July 2, 2015 (public)
+. replace btb_eff_state_pub = 2016 if stateFIPS == 51
+(2,944 real changes made)
+
+. *Washington June 7, 2018 (public)
+. replace btb_eff_state_pub = 2019 if stateFIPS == 53
+(848 real changes made)
+
+. *Washington June 7, 2018 (contract)
+. replace btb_eff_state_con = 2019 if stateFIPS == 53
+(848 real changes made)
+
+. *Washington June 7, 2018 (private)
+. replace btb_eff_state_pri = 2019 if stateFIPS == 53
+(848 real changes made)
+
+. *Wisconsin July 1, 2016 (Public)
+. replace btb_eff_state_pub = 2017 if stateFIPS == 55
+(592 real changes made)
+
+. 
+. replace btb_eff_city_eos = btb_eff_city if btb_eff_city_eos == .
+(9,680 real changes made)
+
+. replace btb_eff_state_eos = btb_eff_state_pub if btb_eff_state_eos == .
+(28,208 real changes made)
+
+. 
+. *make a btb effective variable that is the first city btb law in the MSA (no matter how small the city)
+. bysort metroFIPS: egen btb_eff_met = min(btb_eff_city)
+(17,472 missing values generated)
+
+. bysort metroFIPS: egen btb_eff_met_eos = min(btb_eff_city_eos)
+(17,472 missing values generated)
+
+. bysort metroFIPS: egen btb_eff_met_con = min(btb_eff_city_con)
+(31,904 missing values generated)
+
+. bysort metroFIPS: egen btb_eff_met_pri = min(btb_eff_city_pri)
+(35,104 missing values generated)
+
+. 
+. *make a state btb effective variable that is the first effective date in the MSA for a state law
+. bysort metroFIPS: egen btb_eff_state = min(btb_eff_state_pub)
+(13,072 missing values generated)
+
+. format btb_eff_state %tm
+
+. 
+. *replace btb for a few MSAs where the first adopters were non-principal cities
+. 
+. * Compton, CA July 1, 2011 (public)
+. replace btb_eff_met = 2012 if metroFIPS == 31080
+(608 real changes made)
+
+. * Compton, CA July 1, 2011 (contract)
+. replace btb_eff_met_con = 2012 if metroFIPS == 31080
+(608 real changes made)
+
+. * East Palo Alto January 1, 2005 (public)
+. replace btb_eff_met = 2005 if metroFIPS == 41860
+(880 real changes made)
+
+. * Richmond, CA July 30, 2013 (contract)
+. replace btb_eff_met_con = 2014 if metroFIPS == 41860
+(880 real changes made)
+
+. * Woodstock, NY November 18, 2014 (public)
+. replace btb_eff_met = 2015 if metroFIPS == 28740
+(0 real changes made)
+
+. * Glendale, AZ September 2015 (public, exact day unknown) -> Effective 2016; earlier than
+. * Phoenix's own principal-city law (2017), so it becomes the binding date for this MSA
+. replace btb_eff_met = 2016 if metroFIPS == 38060
+(128 real changes made)
+
+. * North Las Vegas, NV administrative policy dated February 9, 2017 (public) -> Effective
+. * 2018; the only local BTB law for this MSA (coincides with the 2018 NV state law)
+. replace btb_eff_met = 2018 if metroFIPS == 29820
+(48 real changes made)
+
+. 
+. gen btb_eff_met_pub = btb_eff_met
+(17,424 missing values generated)
+
+. 
+. replace btb_eff_met_eos = btb_eff_met if btb_eff_met_eos == .
+(48 real changes made)
+
+. 
+. 
+. *reshape here--don't need an observation for each principal city-county-msa-state-time combo--moving the principal city to wide
+. sort metroFIPS stateFIPS fips_county_code year principal_city 
+
+. by metroFIPS stateFIPS fips_county_code year: gen number = _n
+
+. reshape wide principal_city pc_stateFIPS fips_place_code btb_eff_city btb_eff_city_eos btb_eff_city_pub btb_eff_city_con btb_eff_city_pri, i(metro
+> FIPS msa_name stateFIPS fips_county_code year) j(number)
+(j = 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19)
+
+Data                               Long   ->   Wide
+-----------------------------------------------------------------------------
+Number of observations           42,096   ->   19,776      
+Number of variables                  32   ->   175         
+j variable (19 values)           number   ->   (dropped)
+xij variables:
+                         principal_city   ->   principal_city1 principal_city2 ... principal_city19
+                           pc_stateFIPS   ->   pc_stateFIPS1 pc_stateFIPS2 ... pc_stateFIPS19
+                        fips_place_code   ->   fips_place_code1 fips_place_code2 ... fips_place_code19
+                           btb_eff_city   ->   btb_eff_city1 btb_eff_city2 ... btb_eff_city19
+                       btb_eff_city_eos   ->   btb_eff_city_eos1 btb_eff_city_eos2 ... btb_eff_city_eos19
+                       btb_eff_city_pub   ->   btb_eff_city_pub1 btb_eff_city_pub2 ... btb_eff_city_pub19
+                       btb_eff_city_con   ->   btb_eff_city_con1 btb_eff_city_con2 ... btb_eff_city_con19
+                       btb_eff_city_pri   ->   btb_eff_city_pri1 btb_eff_city_pri2 ... btb_eff_city_pri19
+-----------------------------------------------------------------------------
+
+. 
+. *make binary metro area btb variable that = 1 if time is at or after the effective date
+. gen btb_met = .
+(19,776 missing values generated)
+
+. replace btb_met = 1 if year >= btb_eff_met
+(3,714 real changes made)
+
+. replace btb_met = 0 if year < btb_eff_met
+(16,062 real changes made)
+
+. replace btb_met = 0 if missing(btb_met)
+(0 real changes made)
+
+. 
+. gen btb_met_eos = .
+(19,776 missing values generated)
+
+. replace btb_met_eos = 1 if year >= btb_eff_met_eos
+(3,705 real changes made)
+
+. replace btb_met_eos = 0 if year < btb_eff_met_eos
+(16,071 real changes made)
+
+. replace btb_met_eos = 0 if missing(btb_met_eos)
+(0 real changes made)
+
+. 
+. *make binary state btb variable that = 1 if time is at or after the effective date
+. gen btb_state = .
+(19,776 missing values generated)
+
+. replace btb_state = 1 if year >= btb_eff_state
+(3,774 real changes made)
+
+. replace btb_state = 0 if year < btb_eff_state
+(16,002 real changes made)
+
+. replace btb_state = 0 if missing(btb_state)
+(0 real changes made)
+
+. 
+. gen btb_state_eos = .
+(19,776 missing values generated)
+
+. replace btb_state_eos = 1 if year >= btb_eff_state_eos
+(3,365 real changes made)
+
+. replace btb_state_eos = 0 if year < btb_eff_state_eos
+(16,411 real changes made)
+
+. replace btb_state_eos = 0 if missing(btb_state_eos)
+(0 real changes made)
+
+. 
+. *make binary metro area btb variable for public laws
+. gen btb_met_pub = .
+(19,776 missing values generated)
+
+. replace btb_met_pub = 1 if year > btb_eff_met_pub
+(3,156 real changes made)
+
+. replace btb_met_pub = 0 if year < btb_eff_met_pub
+(16,062 real changes made)
+
+. replace btb_met_pub = 0 if missing(btb_eff_met_pub)
+(0 real changes made)
+
+. 
+. *make binary metro area btb variables for contract and private laws
+. gen btb_met_con = .
+(19,776 missing values generated)
+
+. replace btb_met_con = 1 if year > btb_eff_met_con
+(922 real changes made)
+
+. replace btb_met_con = 0 if year < btb_eff_met_con
+(18,660 real changes made)
+
+. replace btb_met_con = 0 if missing(btb_eff_met_con)
+(0 real changes made)
+
+. 
+. gen btb_met_pri = .
+(19,776 missing values generated)
+
+. replace btb_met_pri = 1 if year > btb_eff_met_pri
+(492 real changes made)
+
+. replace btb_met_pri = 0 if year < btb_eff_met_pri
+(19,162 real changes made)
+
+. replace btb_met_pri = 0 if missing(btb_eff_met_pri)
+(0 real changes made)
+
+. 
+. *make binary state btb variable for public laws
+. gen btb_state_pub = .
+(19,776 missing values generated)
+
+. replace btb_state_pub = 1 if year > btb_eff_state_pub
+(2,552 real changes made)
+
+. replace btb_state_pub = 0 if year < btb_eff_state_pub
+(16,411 real changes made)
+
+. replace btb_state_pub = 0 if missing(btb_eff_state_pub)
+(0 real changes made)
+
+. 
+. *make binary state btb variables for contract and private laws
+. gen btb_state_con = .
+(19,776 missing values generated)
+
+. replace btb_state_con = 1 if year > btb_eff_state_con
+(633 real changes made)
+
+. replace btb_state_con = 0 if year < btb_eff_state_con
+(19,023 real changes made)
+
+. replace btb_state_con = 0 if missing(btb_eff_state_con)
+(0 real changes made)
+
+. 
+. gen btb_state_pri = .
+(19,776 missing values generated)
+
+. replace btb_state_pri = 1 if year > btb_eff_state_pri
+(612 real changes made)
+
+. replace btb_state_pri = 0 if year < btb_eff_state_pri
+(18,979 real changes made)
+
+. replace btb_state_pri = 0 if missing(btb_eff_state_pri)
+(0 real changes made)
+
+. 
+. *public btb variable
+. gen btb_eff = min(btb_eff_met, btb_eff_state)
+(4,432 missing values generated)
+
+. gen BTB = max(btb_met, btb_state)
+
+. 
+. gen btb_eff_eos = min(btb_eff_met_eos, btb_eff_state_eos)
+(4,864 missing values generated)
+
+. gen BTB_eos = max(btb_met_eos, btb_state_eos)
+
+. 
+. *contract and private
+. gen btb_eff_con = min(btb_eff_met_con, btb_eff_state_con)
+(15,040 missing values generated)
+
+. gen btb_eff_pri = min(btb_eff_met_pri, btb_eff_state_pri)
+(15,424 missing values generated)
+
+. 
+. *public btb variable
+. gen btb_pub = max(btb_met_pub, btb_state_pub)
+(20 missing values generated)
+
+. 
+. *contract btb variable
+. gen btb_con = max(btb_met_con, btb_state_con)
+(12 missing values generated)
+
+. 
+. *private btb variable
+. gen btb_pri = max(btb_met_pri, btb_state_pri)
+(14 missing values generated)
+
+. 
+. 
+. label variable btb_eff "BTB eff date"
+
+. label variable BTB "=1 if BTB"
+
+. 
+. label variable btb_eff_met "local BTB eff date"
+
+. label variable btb_met "=1 if local BTB"
+
+.         
+. label variable btb_eff_state "state BTB eff date"
+
+. label variable btb_state "=1 if state BTB"
+
+. 
+. * this is the comprehensive dataset that includes public, contract, and private BTB laws and effective dates for MSAs, states, and "local" parts o
+> f MSAs--we do not use but may be helpful for other researchers who want BTB dates
+. save "$analysis_data/btb_annual_laws_v0.dta", replace
+file C:\dev\Final\2004-2019/build/analysis_data/btb_annual_laws_v0.dta saved
+
+. 
+. keep metroFIPS msa_name stateFIPS fips_county_code year BTB btb_eff btb_state BTB_eos btb_state_eos
+
+. duplicates drop
+
+Duplicates in terms of all variables
+
+(0 observations are duplicates)
+
+. 
+. * this is the dataset with only MSA, county, state, year, and BTB (public) variables that we use in our map figure
+. save "$analysis_data/btb_annual_laws_map.dta", replace
+file C:\dev\Final\2004-2019/build/analysis_data/btb_annual_laws_map.dta saved
+
+. 
+. keep metroFIPS msa_name stateFIPS year BTB btb_eff btb_state
+
+. duplicates drop
+
+Duplicates in terms of all variables
+
+(12,656 observations deleted)
+
+. 
+. * this is the sparse dataset with only MSA, state, year, and BTB variables that we use in our analysis
+. save "$analysis_data/btb_annual_laws.dta", replace
+file C:\dev\Final\2004-2019/build/analysis_data/btb_annual_laws.dta saved
+
+. 
+. log close
+      name:  <unnamed>
+       log:  C:\dev\Final\2004-2019/build/log/build_btb_annual_bw.txt
+  log type:  text
+ closed on:  21 Jul 2026, 23:49:51
+----------------------------------------------------------------------------------------------------------------------------------------------------
