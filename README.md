@@ -4,7 +4,7 @@ This repo contains the code for Nooa von Schöneman's extension of the ACS
 analysis in Anne M. Burton and David N. Wasser's *Revisiting the Unintended
 Consequences of Ban the Box*. It reproduces their ACS analysis for 2004–2014
 and extends the sample through 2019. The research question, methods, diagnostics,
-and results are described in the [bachelor's thesis](../thesis_evaluating_fair_chance_employment.pdf):
+and results are described in the included bachelor's thesis:
 *Evaluating “Fair Chance” Employment: Revisiting Ban the Box's Effect on
 Minority Employment with Extended ACS Data* (2026).
 
