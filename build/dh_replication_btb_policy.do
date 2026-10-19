@@ -31,6 +31,7 @@ save "$analysis_data/dh_btb_policy_assignment.dta", replace
 ********************************************************************************
 * CPS data
 ********************************************************************************
+<<<<<<< HEAD
 *use  "$dh_replication/BTB_data.dta", clear
 
 *local dh_sample = "male==1 & age>=25 & age<35  & citizen==1 & retired==0 & noCollege==1"
@@ -45,3 +46,19 @@ save "$analysis_data/dh_btb_policy_assignment.dta", replace
 *ren BTBever dhBTBever
 
 *save "$analysis_data/dh_btb_policy_assignment_cps_original.dta", replace
+=======
+use  "$dh_replication/BTB_data.dta", clear
+
+local dh_sample = "male==1 & age>=25 & age<35  & citizen==1 & retired==0 & noCollege==1"
+keep if `dh_sample'
+
+keep month year time stateFIPS metroFIPS BTB BTBever time_BTBpub
+
+duplicates drop 
+label drop _all 
+
+ren BTB dhBTB
+ren BTBever dhBTBever
+
+save "$analysis_data/dh_btb_policy_assignment_cps_original.dta", replace
+>>>>>>> 2c34ba91382b7f3e9ed86be331b5c0dd65be2bea

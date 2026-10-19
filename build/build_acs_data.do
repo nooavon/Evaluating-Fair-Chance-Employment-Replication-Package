@@ -74,8 +74,13 @@ rename msa_2013 cbsa_code
 * Keep only men for now 
 keep if (sex == 1)
 
+<<<<<<< HEAD
 * Stop sample in 2019
 drop if (year > 2019)
+=======
+* Stop sample in 2014
+drop if (year > 2014)
+>>>>>>> 2c34ba91382b7f3e9ed86be331b5c0dd65be2bea
 
 * Code region and divisions for FEs
 gen gereg = 1 if (region == 11 | region == 12)
@@ -125,11 +130,15 @@ drop _merge
 
 * Add in treatment dates for non-MSAs covered by state laws
 replace BTB = 0 if (metroFIPS == stateFIPS)
+<<<<<<< HEAD
 replace BTB = 1 if (metroFIPS == 04 & year >= 2018) // Arizona
+=======
+>>>>>>> 2c34ba91382b7f3e9ed86be331b5c0dd65be2bea
 replace BTB = 1 if (metroFIPS == 06 & year >= 2011) // California
 replace BTB = 1 if (metroFIPS == 08 & year >= 2013) // Colorado
 replace BTB = 1 if (metroFIPS == 09 & year >= 2011) // Connecticut
 replace BTB = 1 if (metroFIPS == 10 & year >= 2015) // Delaware
+<<<<<<< HEAD
 replace BTB = 1 if (metroFIPS == 13 & year >= 2016) // Georgia
 replace BTB = 1 if (metroFIPS == 15 & year >= 1999) // Hawaii
 replace BTB = 1 if (metroFIPS == 17 & year >= 2014) // Illinois
@@ -158,6 +167,16 @@ replace BTB = 1 if (metroFIPS == 50 & year >= 2016) // Vermont
 replace BTB = 1 if (metroFIPS == 51 & year >= 2016) // Virginia
 replace BTB = 1 if (metroFIPS == 53 & year >= 2019) // Washington
 replace BTB = 1 if (metroFIPS == 55 & year >= 2017) // Wisconsin
+=======
+replace BTB = 1 if (metroFIPS == 15 & year >= 1998) // Hawaii
+replace BTB = 1 if (metroFIPS == 17 & year >= 2014) // Illinois
+replace BTB = 1 if (metroFIPS == 24 & year >= 2014) // Maryland
+replace BTB = 1 if (metroFIPS == 25 & year >= 2011) // Massachusetts
+replace BTB = 1 if (metroFIPS == 27 & year >= 2009) // Minnesota
+replace BTB = 1 if (metroFIPS == 31 & year >= 2015) // Nebraska
+replace BTB = 1 if (metroFIPS == 35 & year >= 2011) // New Mexico
+replace BTB = 1 if (metroFIPS == 44 & year >= 2014) // Rhode Island
+>>>>>>> 2c34ba91382b7f3e9ed86be331b5c0dd65be2bea
 
 
 bys metroFIPS: egen BTBever = max(BTB)
@@ -186,11 +205,14 @@ replace dh_time = 84 if year == 2011
 replace dh_time = 96 if year == 2012
 replace dh_time = 108 if year == 2013
 replace dh_time = 120 if year == 2014
+<<<<<<< HEAD
 replace dh_time = 132 if year == 2015
 replace dh_time = 144 if year == 2016
 replace dh_time = 156 if year == 2017
 replace dh_time = 168 if year == 2018
 replace dh_time = 180 if year == 2019
+=======
+>>>>>>> 2c34ba91382b7f3e9ed86be331b5c0dd65be2bea
 
 
 ***** Save the dataset

@@ -93,7 +93,11 @@ local include_models "m1 m2 m3 m4 m5"
 * Output regression table
 estfe `include_models', labels(metroFIPS "MSA FE" dh_time#gereg "Year-Region FE" age#dh_group "Demographics" metroFIPS#c.dh_time "MSA-Specific Trends")
 
+<<<<<<< HEAD
 esttab `include_models' using "$out/tableA6.rtf", replace compress noconstant se(4) b(4) r2(4) nogaps indicate(`r(indicate_fe)') noomitted nobase scalars("black_mean Pre-BTB Mean: Black" "hispanic_mean Pre-BTB Mean: Hispanic" "white_mean Pre-BTB Mean: White" "black_percent \% Effect: Black" "hispanic_percent \% Effect: Hispanic" "white_percent \% Effect: White") sfmt(4 4 4 2 2 2) nomtitles keep(BTBx*) coeflabels(BTBxWhiteNH "BTB x White" BTBxBlackNH "BTB x Black" BTBxHisp "BTB x Hispanic") star(* 0.10 ** 0.05 *** 0.01)
+=======
+esttab `include_models' using "$out/tableA6.tex", replace compress noconstant se(4) b(4) r2(4) nogaps indicate(`r(indicate_fe)') noomitted nobase scalars("black_mean Pre-BTB Mean: Black" "hispanic_mean Pre-BTB Mean: Hispanic" "white_mean Pre-BTB Mean: White" "black_percent \% Effect: Black" "hispanic_percent \% Effect: Hispanic" "white_percent \% Effect: White") sfmt(4 4 4 2 2 2) nomtitles keep(BTBx*) coeflabels(BTBxWhiteNH "BTB x White" BTBxBlackNH "BTB x Black" BTBxHisp "BTB x Hispanic") star(* 0.10 ** 0.05 *** 0.01)
+>>>>>>> 2c34ba91382b7f3e9ed86be331b5c0dd65be2bea
 
 
 ********************************************************************************
@@ -148,7 +152,11 @@ local include_models "m*"
 * Output regression table
 estfe `include_models', labels(metroFIPS "MSA FE" metroFIPS#group "MSA FE" year#division "Year-Region FE" year#division#group "Year-Region FE" year#division "Year-Division FE" age#group "Demographics" metroFIPS#c.year "MSA-Specific Trends")
 
+<<<<<<< HEAD
 esttab `include_models' using "$out/tableA7columns345.rtf", replace compress noconstant se(4) b(4) r2(4) nogaps indicate(`r(indicate_fe)') noomitted nobase scalars("black_mean Pre-BTB Mean: Black" "hispanic_mean Pre-BTB Mean: Hispanic" "white_mean Pre-BTB Mean: White" "black_percent \% Effect: Black" "hispanic_percent \% Effect: Hispanic" "white_percent \% Effect: White") sfmt(4 4 4 2 2 2) keep(BTBx*) coeflabels(BTBxWhiteNH "BTB x White" BTBxBlackNH "BTB x Black" BTBxHisp "BTB x Hispanic") star(* 0.10 ** 0.05 *** 0.01) mtitles("Drop Obs in Group Quarters" "With Sample Weights")
+=======
+esttab `include_models' using "$out/tableA7columns345.tex", replace compress noconstant se(4) b(4) r2(4) nogaps indicate(`r(indicate_fe)') noomitted nobase scalars("black_mean Pre-BTB Mean: Black" "hispanic_mean Pre-BTB Mean: Hispanic" "white_mean Pre-BTB Mean: White" "black_percent \% Effect: Black" "hispanic_percent \% Effect: Hispanic" "white_percent \% Effect: White") sfmt(4 4 4 2 2 2) keep(BTBx*) coeflabels(BTBxWhiteNH "BTB x White" BTBxBlackNH "BTB x Black" BTBxHisp "BTB x Hispanic") star(* 0.10 ** 0.05 *** 0.01) mtitles("Drop Obs in Group Quarters" "With Sample Weights")
+>>>>>>> 2c34ba91382b7f3e9ed86be331b5c0dd65be2bea
 
 
 log close
